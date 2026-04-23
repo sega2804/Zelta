@@ -121,5 +121,5 @@ dependencies {
     testImplementation(libs.coroutines.test)
 
     // for api level 24
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
