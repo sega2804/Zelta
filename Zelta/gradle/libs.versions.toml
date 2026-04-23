@@ -24,6 +24,7 @@ datastore                  = "1.2.1"
 splashscreen               = "1.2.0"
 mockk                      = "1.13.10"
 material3 = "1.4.0"
+firebaseAuthKtx = "24.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,8 +59,8 @@ room-compiler              = { group = "androidx.room", name = "room-compiler", 
 
 # Firebase
 firebase-bom               = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-firestore         = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
-firebase-auth              = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-firestore         = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-auth              = { group = "com.google.firebase", name = "firebase-auth" }
 
 # Google Sign-In
 google-auth                = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "googleAuth" }
@@ -83,6 +84,7 @@ splashscreen               = { group = "androidx.core", name = "core-splashscree
 mockk                      = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 coroutines-test            = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuthKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

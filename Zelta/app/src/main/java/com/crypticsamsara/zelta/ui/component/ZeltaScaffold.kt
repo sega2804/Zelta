@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
@@ -58,6 +59,12 @@ sealed class ZeltaScreen(
         label = "Goals",
         icon = Icons.Rounded.TrackChanges
     )
+
+    object Budget : ZeltaScreen(
+        route = "budget",
+        label = "Budget",
+        icon = Icons.Rounded.AccountBalance
+    )
     object Insights : ZeltaScreen(
         route = "insights",
         label = "Insights",
@@ -75,7 +82,8 @@ val zeltaNavItems = listOf(
     ZeltaScreen.Track,
     ZeltaScreen.Goals,
     ZeltaScreen.Insights,
-    ZeltaScreen.Profile
+    ZeltaScreen.Profile,
+    ZeltaScreen.Budget
 )
 
 // Bottom nav bar

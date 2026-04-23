@@ -11,12 +11,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.crypticsamsara.zelta.ui.budget.BudgetScreen
 import com.crypticsamsara.zelta.ui.component.ZeltaScaffold
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 import com.crypticsamsara.zelta.ui.component.ZeltaScreen
+import com.crypticsamsara.zelta.ui.goals.GoalsScreen
 import com.crypticsamsara.zelta.ui.home.HomeScreen
+import com.crypticsamsara.zelta.ui.track.TrackScreen
 
 @Composable
 fun ZeltaNavGraph(
@@ -40,15 +43,17 @@ fun ZeltaNavGraph(
             }
 
             composable(ZeltaScreen.Track.route) {
-
-                PlaceholderScreen("Track")
+               TrackScreen()
             }
 
             composable(ZeltaScreen.Goals.route) {
 
-                PlaceholderScreen("Goals")
+                GoalsScreen()
             }
 
+            composable(ZeltaScreen.Budget.route) {
+                BudgetScreen()
+            }
             composable(ZeltaScreen.Insights.route) {
 
                 PlaceholderScreen("Insights")
