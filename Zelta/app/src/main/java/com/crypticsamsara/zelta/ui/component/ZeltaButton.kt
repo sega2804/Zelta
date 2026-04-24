@@ -51,7 +51,7 @@ fun ZeltaPrimaryButton(
 @Composable
 fun ZeltaSecondaryButton(
     text: String,
-    onClick: () -> Unit,
+    onClick:  () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {

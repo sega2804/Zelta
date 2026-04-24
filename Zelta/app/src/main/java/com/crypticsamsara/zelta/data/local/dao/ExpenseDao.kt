@@ -66,7 +66,10 @@ interface ExpenseDao {
     suspend fun getPendingExpenses(): List<ExpenseEntity>
 
     @Query("UPDATE expenses SET syncState = :syncState WHERE id = :id")
-    suspend fun setExpenseSynced(id: String, syncState: String)
+    suspend fun updateSyncState(id: String, syncState: String)
+
+    @Query("UPDATE expenses SET syncState = :syncState WHERE id IN (:expenseIds)")
+    suspend fun updateSyncState(expenseIds: List<String>, syncState: String)
 
     // Pagination
     @Query("SELECT * FROM expenses ORDER BY date DESC LIMIT :pageSize OFFSET :offset")

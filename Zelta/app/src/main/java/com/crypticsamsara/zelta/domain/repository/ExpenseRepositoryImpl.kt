@@ -5,6 +5,7 @@ import com.crypticsamsara.zelta.data.local.dao.CategoryTotal
 import com.crypticsamsara.zelta.data.local.dao.ExpenseDao
 import com.crypticsamsara.zelta.data.local.entity.toDomain
 import com.crypticsamsara.zelta.data.local.entity.toEntity
+import com.crypticsamsara.zelta.data.remote.SyncManager
 import com.crypticsamsara.zelta.domain.model.Expense
 import com.crypticsamsara.zelta.domain.model.ZeltaResult
 import com.crypticsamsara.zelta.domain.model.safeCall
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ExpenseRepositoryImpl @Inject constructor(
-    private val expenseDao: ExpenseDao
+    private val expenseDao: ExpenseDao,
+    private val syncManager: SyncManager
 ) : ExpenseRepository {
 
     override suspend fun addExpense(
@@ -26,12 +28,18 @@ class ExpenseRepositoryImpl @Inject constructor(
         expense: Expense
     ): ZeltaResult<Unit> = safeCall {
         expenseDao.updateExpense(expense.toEntity())
+        syncManager.syncNow()
     }
 
     override suspend fun deleteExpense(
         id: String
     ): ZeltaResult<Unit> = safeCall {
         expenseDao.deleteExpenseById(id)
+        syncManager.syncNow()
+    }
+
+    override suspend fun syncPendingExpenses(): ZeltaResult<Unit> = safeCall {
+        syncManager.syncNow()
     }
 
     override fun getAllExpenses(): Flow<List<Expense>> =
@@ -79,8 +87,4 @@ class ExpenseRepositoryImpl @Inject constructor(
     ): Flow<List<CategoryTotal>> =
         expenseDao.getCategoryTotalsForMonth(monthYear)
 
-    override suspend fun syncPendingExpenses(): ZeltaResult<Unit> = safeCall {
-        // Firebase sync logic goes here in Week 2
-        // For now this is a no-op placeholder
-    }
 }

@@ -4,6 +4,7 @@ import com.crypticsamsara.zelta.data.local.dao.CategoryTotal
 import com.crypticsamsara.zelta.domain.model.Budget
 import com.crypticsamsara.zelta.domain.model.Expense
 import com.crypticsamsara.zelta.domain.model.Goal
+import com.crypticsamsara.zelta.domain.model.SyncState
 import com.crypticsamsara.zelta.domain.usecase.FinanceScore
 import java.time.LocalTime
 import java.time.YearMonth
@@ -28,7 +29,10 @@ data class HomeUiState(
     val financeScore: FinanceScore? = null,
 
     // error
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+
+    // sync state
+    val syncState: SyncState = SyncState.SYNCED
 ) {
     // derived - total budget limit for the month
     val totalBudgetLimit: Double

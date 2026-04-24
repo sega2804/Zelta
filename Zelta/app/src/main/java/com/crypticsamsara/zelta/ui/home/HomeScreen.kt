@@ -47,6 +47,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.crypticsamsara.zelta.domain.model.Expense
 import com.crypticsamsara.zelta.domain.model.Goal
+import com.crypticsamsara.zelta.domain.model.SyncState
 import com.crypticsamsara.zelta.ui.component.ZeltaCard
 import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
@@ -133,7 +134,8 @@ private fun HomeContent(
                 userName = uiState.userName.ifBlank { "there" },
                 month = uiState.currentMonth.format(
                     DateTimeFormatter.ofPattern("MMMM yyyy")
-                )
+                ),
+                syncState = uiState.syncState
             )
         }
 
@@ -222,7 +224,8 @@ private fun HomeContent(
 private fun HomeHeader(
     greeting: String,
     userName: String,
-    month: String
+    month: String,
+    syncState: SyncState
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -249,6 +252,18 @@ private fun HomeHeader(
                 tint = ZeltaTextSecondary
             )
         }
+        Box(
+            modifier = Modifier.size(8.dp)
+                .clip(CircleShape)
+                .background(
+                    when (syncState) {
+                        SyncState.SYNCED -> ZeltaMint
+                        SyncState.PENDING -> ZeltaWarning
+                        SyncState.FAILED -> ZeltaDanger
+                        else -> Color.Transparent
+                    }
+                )
+        )
     }
 }
 

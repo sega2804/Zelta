@@ -23,4 +23,6 @@ data class ExpenseEntity(
     val syncState: String, // stored as SyncState.name
     val localModified: Long, // Store as epoch millis for easier Room compatibility
     val cloudModified: Long? = null // Store as epoch millis for easier Room compatibility
-)
+) {
+
+}
