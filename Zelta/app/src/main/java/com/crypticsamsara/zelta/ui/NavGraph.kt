@@ -24,6 +24,10 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 import com.crypticsamsara.zelta.ui.component.ZeltaScreen
 import com.crypticsamsara.zelta.ui.goals.GoalsScreen
 import com.crypticsamsara.zelta.ui.home.HomeScreen
+import com.crypticsamsara.zelta.ui.theme.zeltaSlideInFromLeft
+import com.crypticsamsara.zelta.ui.theme.zeltaSlideInFromRight
+import com.crypticsamsara.zelta.ui.theme.zeltaSlideOutToLeft
+import com.crypticsamsara.zelta.ui.theme.zeltaSlideOutToRight
 import com.crypticsamsara.zelta.ui.track.TrackScreen
 
 
@@ -45,6 +49,7 @@ fun ZeltaNavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination
+
     ) {
         // Auth flow
         composable(ROUTE_AUTH) {
@@ -79,7 +84,11 @@ fun MainNavGraph(onSignOut: () -> Unit) {
     ZeltaScaffold(navController = mainNavController) {
         NavHost(
             navController    = mainNavController,
-            startDestination = ZeltaScreen.Home.route
+            startDestination = ZeltaScreen.Home.route,
+            enterTransition = { zeltaSlideInFromRight },
+            exitTransition = { zeltaSlideOutToLeft },
+            popEnterTransition = { zeltaSlideInFromLeft },
+            popExitTransition = { zeltaSlideOutToRight }
         ) {
             composable(ZeltaScreen.Home.route) {
                 HomeScreen(
