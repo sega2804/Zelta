@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.crypticsamsara.zelta.domain.model.Expense
 import com.crypticsamsara.zelta.domain.model.Goal
 import com.crypticsamsara.zelta.domain.model.SyncState
+import com.crypticsamsara.zelta.ui.component.HomeShimmer
 import com.crypticsamsara.zelta.ui.component.ZeltaCard
 import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
@@ -79,10 +80,7 @@ fun HomeScreen(
             .background(ZeltaBgBase)
     ) {
         if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = ZeltaIndigo
-            )
+            HomeShimmer()
         } else {
             HomeContent(
                 uiState = uiState,
