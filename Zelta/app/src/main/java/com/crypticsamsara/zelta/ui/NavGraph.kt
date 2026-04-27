@@ -24,6 +24,7 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 import com.crypticsamsara.zelta.ui.component.ZeltaScreen
 import com.crypticsamsara.zelta.ui.goals.GoalsScreen
 import com.crypticsamsara.zelta.ui.home.HomeScreen
+import com.crypticsamsara.zelta.ui.profile.ProfileScreen
 import com.crypticsamsara.zelta.ui.theme.zeltaSlideInFromLeft
 import com.crypticsamsara.zelta.ui.theme.zeltaSlideInFromRight
 import com.crypticsamsara.zelta.ui.theme.zeltaSlideOutToLeft
@@ -123,7 +124,7 @@ fun MainNavGraph(onSignOut: () -> Unit) {
 
             composable(ZeltaScreen.Profile.route) {
 
-                PlaceholderScreen("Profile")
+                ProfileScreen(onSignOut = onSignOut)
             }
         }
     }
