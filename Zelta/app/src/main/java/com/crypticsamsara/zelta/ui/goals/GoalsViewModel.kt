@@ -7,6 +7,7 @@ import com.crypticsamsara.zelta.domain.usecase.AddGoalUseCase
 import com.crypticsamsara.zelta.domain.usecase.ContributeToGoalUseCase
 import com.crypticsamsara.zelta.domain.usecase.DeleteGoalUseCase
 import com.crypticsamsara.zelta.domain.usecase.GetAllGoalsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.NonCancellable.isCompleted
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+
+@HiltViewModel
 class GoalsViewModel @Inject constructor(
     private val getAllGoals: GetAllGoalsUseCase,
     private val addGoal: AddGoalUseCase,

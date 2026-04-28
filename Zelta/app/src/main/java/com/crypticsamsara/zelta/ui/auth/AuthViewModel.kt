@@ -156,22 +156,26 @@ class AuthViewModel @Inject constructor(
         email: String,
         password: String
     ): Boolean {
+        Log.d("AuthDebug", "SignIn - email: '$email' password length: ${password.length}")
+
         if (email.isBlank() || !email.contains("@")) {
             _uiState.update { it.copy(errorMessage = "Enter a valid email") }
             return false
         }
-        if (password.length< 8) {
+        if (password.length < 8) {
             _uiState.update { it.copy(errorMessage = "Password must be at least 8 characters") }
             return false
         }
         return true
-        }
+    }
 
     private fun validateRegistration(
+        name: String,
         email: String,
         password: String,
-        name: String
     ): Boolean {
+        Log.d("AuthDebug", "Register — name: '$name' email: '$email' password length: ${password.length}")
+
         if(name.isBlank()) {
             _uiState.update { it.copy(errorMessage = "Enter your name") }
             return false

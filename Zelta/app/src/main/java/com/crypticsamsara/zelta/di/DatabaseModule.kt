@@ -28,7 +28,7 @@ object DatabaseModule {
         "zelta_database"
     )
         .addCallback(ZeltaDatabase.getPrepopulateCallback())
-        .fallbackToDestructiveMigration(false)
+        .fallbackToDestructiveMigration()
         .build()
 
     @Provides

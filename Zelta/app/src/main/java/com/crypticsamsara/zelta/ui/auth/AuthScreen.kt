@@ -43,12 +43,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -85,6 +88,7 @@ fun AuthScreen(
     val snackbarState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val webClientId = stringResource(R.string.default_web_client_id)
+
 
     // Navigate away when signed in
     LaunchedEffect(uiState.currentUser) {
@@ -305,10 +309,16 @@ private fun SignInForm(
     var password        by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val currentEmail by rememberUpdatedState(email)
+    val currentPassword by rememberUpdatedState(password)
+
+    val focusManager    = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column {
         ZeltaTextField(
             value         = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it.trim() },
             placeholder   = "Email address",
             leadingIcon   = {
                 Icon(
@@ -362,7 +372,10 @@ private fun SignInForm(
         } else {
             ZeltaPrimaryButton(
                 text    = "Sign In",
-                onClick = { onSignIn(email, password) }
+                onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onSignIn(currentEmail.trim(), currentPassword) }
             )
         }
     }
@@ -378,6 +391,16 @@ private fun RegisterForm(
     var email           by remember { mutableStateOf("") }
     var password        by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val currentName by rememberUpdatedState(name)
+    val currentEmail by rememberUpdatedState(email)
+    val currentPassword by rememberUpdatedState(password)
+
+    val focusManager    = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+
+
 
     Column {
         ZeltaTextField(
@@ -451,7 +474,15 @@ private fun RegisterForm(
         } else {
             ZeltaPrimaryButton(
                 text    = "Create Account",
-                onClick = { onRegister(name, email, password) }
+                onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onRegister(
+                        currentName.trim(),
+                        currentEmail.trim(),
+                        currentPassword
+                    )
+                }
             )
         }
     }

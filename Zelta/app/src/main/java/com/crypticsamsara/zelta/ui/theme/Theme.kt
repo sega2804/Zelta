@@ -7,12 +7,19 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// ── Dark Color Scheme (Primary) ───────────────────────
+object ZeltaThemeState {
+    var isDarkMode by mutableStateOf(true)
+}
+
+//Dark Color Scheme (Primary)
 private val ZeltaDarkColorScheme = darkColorScheme(
     primary            = ZeltaIndigo,
     onPrimary          = ZeltaTextPrimary,
@@ -39,7 +46,7 @@ private val ZeltaDarkColorScheme = darkColorScheme(
     onError            = ZeltaTextPrimary,
 )
 
-// ── Light Color Scheme (Optional) ────────────────────
+//Light Color Scheme (Optional)
 private val ZeltaLightColorScheme = lightColorScheme(
     primary            = ZeltaIndigoDark,
     onPrimary          = Color(0xFFFFFFFF),
@@ -66,10 +73,10 @@ private val ZeltaLightColorScheme = lightColorScheme(
     onError            = Color(0xFFFFFFFF),
 )
 
-// ── Zelta Theme ───────────────────────────────────────
+// ── Zelta Theme
 @Composable
 fun ZeltaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = ZeltaThemeState.isDarkMode,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) ZeltaDarkColorScheme else ZeltaLightColorScheme

@@ -1,6 +1,7 @@
 package com.crypticsamsara.zelta.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,6 +57,7 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaMint
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
+import com.crypticsamsara.zelta.ui.theme.ZeltaThemeState
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 
 
@@ -63,10 +66,14 @@ fun ProfileScreen(
     onSignOut: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val authState by authViewModel.uiState.collectAsStateWithLifecycle()
     var showSignOutDialog by remember { mutableStateOf(false) }
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var darkModeEnabled by remember { mutableStateOf(true) }
+    var darkModeEnabled by remember { mutableStateOf(
+        ZeltaThemeState.isDarkMode
+    ) }
+
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -153,7 +160,10 @@ fun ProfileScreen(
                             Icons.Rounded.DarkMode else Icons.Rounded.LightMode,
                         label   = "Dark Mode",
                         checked = darkModeEnabled,
-                        onCheckedChange = { darkModeEnabled = it }
+                        onCheckedChange = {
+                            darkModeEnabled = it
+                            ZeltaThemeState.isDarkMode = it
+                        }
                     )
                 }
             }
@@ -183,7 +193,14 @@ fun ProfileScreen(
                     SettingsNavRow(
                         icon  = Icons.Rounded.Security,
                         label = "Privacy Policy",
-                        value = ""
+                        value = "",
+                        onClick = {
+                            val intent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse("https://your-privacy-policy-url.com")
+                            )
+                            context.startActivity(intent)
+                        }
                     )
                 }
             }
@@ -316,11 +333,16 @@ private fun SettingsNavRow(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color = ZeltaTextSecondary
+    color: Color = ZeltaTextSecondary,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier              = Modifier
             .fillMaxWidth()
+            .then(
+                if (onClick != null) Modifier.clickable { onClick() }
+                else Modifier
+            )
             .padding(vertical = 4.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

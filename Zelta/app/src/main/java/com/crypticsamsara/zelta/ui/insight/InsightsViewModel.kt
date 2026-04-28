@@ -2,11 +2,7 @@ package com.crypticsamsara.zelta.ui.insight
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.crypticsamsara.zelta.data.local.dao.CategoryTotal
-import com.crypticsamsara.zelta.domain.model.Budget
-import com.crypticsamsara.zelta.domain.model.Category
 import com.crypticsamsara.zelta.domain.model.Expense
-import com.crypticsamsara.zelta.domain.model.Goal
 import com.crypticsamsara.zelta.domain.repository.CategoryRepository
 import com.crypticsamsara.zelta.domain.usecase.CalculateFinanceScoreUseCase
 import com.crypticsamsara.zelta.domain.usecase.GetActiveGoalsUseCase
@@ -52,7 +48,7 @@ class InsightsViewModel @Inject constructor(
 
     private fun observeInsightsData() {
         viewModelScope.launch {
-            combine(
+            /*combine(
                 getAllExpenses(),
                 getTotalSpentByMonth(currentMonth),
                 getTotalSpentByMonth(lastMonth),
@@ -74,16 +70,38 @@ class InsightsViewModel @Inject constructor(
                 val score        = calculateFinanceScore(expenses, budgets, goals)
                 val weeklySpend  = buildWeeklySpend(expenses)
 
+             */ // revert if error persists
+            combine(
+                getAllExpenses(),
+                getTotalSpentByMonth(currentMonth),
+                getTotalSpentByMonth(lastMonth),
+                getCategoryTotals(currentMonth),
+                categoryRepository.getAllCategories()
+            ) { expenses, totalSpent, lastMonthTotal, categoryTotals, categories ->
+                Quintuple(expenses, totalSpent, lastMonthTotal, categoryTotals, categories)
+            }.combine(
+                // Second combine — remaining 2 flows
+                combine(
+                    getBudgetsByMonth(currentMonth),
+                    getActiveGoals()
+                ) { budgets, goals -> Pair(budgets, goals) }
+            ) { quintuple, pair ->
+                val (expenses, totalSpent, lastMonthTotal, categoryTotals, categories) = quintuple
+                val (budgets, goals) = pair
+
+                val score       = calculateFinanceScore(expenses, budgets, goals)
+                val weeklySpend = buildWeeklySpend(expenses)
+
                 InsightsUiState(
-                    isLoading       = false,
-                    expenses        = expenses,
-                    totalSpent      = totalSpent,
-                    lastMonthTotal  = lastMonthTotal,
-                    categoryTotals  = categoryTotals,
-                    categories      = categories,
-                    budgets         = budgets,
-                    financeScore    = score,
-                    weeklySpend     = weeklySpend
+                    isLoading = false,
+                    expenses = expenses,
+                    totalSpent = totalSpent,
+                    lastMonthTotal = lastMonthTotal,
+                    categoryTotals = categoryTotals,
+                    categories = categories,
+                    budgets = budgets,
+                    financeScore = score,
+                    weeklySpend = weeklySpend
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -121,5 +139,19 @@ class InsightsViewModel @Inject constructor(
     fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
+    private data class Quintuple<A, B, C, D, E>(
+        val first: A,
+        val second: B,
+        val third: C,
+        val fourth: D,
+        val fifth: E
+    )
+
+    private operator fun <A, B, C, D, E> Quintuple<A, B, C, D, E>.component1() = first
+    private operator fun <A, B, C, D, E> Quintuple<A, B, C, D, E>.component2() = second
+    private operator fun <A, B, C, D, E> Quintuple<A, B, C, D, E>.component3() = third
+    private operator fun <A, B, C, D, E> Quintuple<A, B, C, D, E>.component4() = fourth
+    private operator fun <A, B, C, D, E> Quintuple<A, B, C, D, E>.component5() = fifth
 }
 
