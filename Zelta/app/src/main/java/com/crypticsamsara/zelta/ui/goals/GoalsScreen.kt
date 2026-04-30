@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -45,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -55,8 +60,10 @@ import com.crypticsamsara.zelta.ui.component.ZeltaCard
 import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
 import com.crypticsamsara.zelta.ui.component.ZeltaPrimaryButton
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
+import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
 import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
+import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
 import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaMint
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
@@ -84,6 +91,19 @@ fun GoalsScreen(
             .fillMaxSize()
             .background(ZeltaBgBase)
     ) {
+        // Glow
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(ZeltaIndigoGlow, Color.Transparent)
+                    ),
+                    CircleShape
+                )
+                .align(Alignment.TopEnd)
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Header
@@ -116,7 +136,7 @@ fun GoalsScreen(
                     contentPadding        = PaddingValues(
                         start  = 20.dp,
                         end    = 20.dp,
-                        bottom = 100.dp
+                        bottom = 110.dp
                     ),
                     verticalArrangement   = Arrangement.spacedBy(12.dp)
                 ) {
@@ -142,11 +162,13 @@ fun GoalsScreen(
             modifier       = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
-            shape          = RoundedCornerShape(16.dp),
+            shape          = RoundedCornerShape(20.dp),
             containerColor = ZeltaIndigo,
             contentColor   = ZeltaTextPrimary
         ) {
-            Icon(Icons.Rounded.Add, contentDescription = "Add Goal")
+            Icon(Icons.Rounded.Add,
+                contentDescription = "Add Goal",
+                modifier = Modifier.size(26.dp))
         }
 
         // Celebration overlay
@@ -218,12 +240,21 @@ private fun GoalsHeader(
             style = ZeltaTypography.headlineLarge,
             color = ZeltaTextPrimary
         )
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.Bottom) {
         Text(
             text  = "$${"%.2f".format(totalSaved)} saved of $${"%.2f".format(totalTarget)}",
-            style = ZeltaTypography.bodyMedium,
+            style = ZeltaTypography.displaySmall,
             color = ZeltaTextSecondary
         )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text     = "saved of $${"%.2f".format(totalTarget)}",
+                style    = ZeltaTypography.bodyMedium,
+                color    = ZeltaTextDim,
+                modifier = Modifier.padding(bottom = 3.dp)
+            )
+        }
     }
 }
 
@@ -239,12 +270,12 @@ private fun GoalsTabs(
         containerColor   = ZeltaBgBase,
         contentColor     = ZeltaIndigoLight,
         indicator        = { tabPositions ->
-            TabRowDefaults.Indicator(
-                modifier  = Modifier.tabIndicatorOffset(
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(
                     tabPositions[tabs.indexOf(selectedTab)]
                 ),
-                color     = ZeltaIndigo,
-                height    = 2.dp
+                height = 2.dp,
+                color = ZeltaIndigo
             )
         }
     ) {
@@ -280,7 +311,13 @@ private fun GoalCard(
     )
     LaunchedEffect(Unit) { animationPlayed = true }
 
-    ZeltaCard(cornerRadius = 20.dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(ZeltaBgCard)
+            .padding(20.dp)
+    ) {
         Column {
 
             //Top Row
@@ -291,19 +328,25 @@ private fun GoalCard(
             ) {
                 Row(
                     verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Icon bubble
                     Box(
                         modifier         = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(ZeltaIndigo.copy(alpha = 0.15f)),
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Brush.linearGradient(
+                                colors = listOf(
+                                    ZeltaIndigo.copy(alpha = 0.3f),
+                                    ZeltaIndigo.copy(alpha = 0.1f)
+                                    )
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text  = goal.icon,
-                            style = ZeltaTypography.titleLarge
+                            style = ZeltaTypography.headlineMedium
                         )
                     }
 
@@ -336,7 +379,21 @@ private fun GoalCard(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
+
+            // Progress bar
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(100.dp)),
+                color = ZeltaIndigo,
+                trackColor = ZeltaBgElevated,
+                strokeCap = StrokeCap.Round
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             // Amounts
             Row(
@@ -351,8 +408,20 @@ private fun GoalCard(
                     )
                     Text(
                         text  = "$${"%.2f".format(goal.currentAmount)}",
-                        style = ZeltaTypography.headlineMedium,
+                        style = ZeltaTypography.headlineSmall,
                         color = ZeltaMint
+                    )
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text  = "PROGRESS",
+                        style = ZeltaTypography.labelSmall,
+                        color = ZeltaTextDim
+                    )
+                    Text(
+                        text  = "$${"%.2f".format(goal.remainingAmount)}",
+                        style = ZeltaTypography.headlineSmall,
+                        color = ZeltaIndigoLight
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
@@ -363,42 +432,10 @@ private fun GoalCard(
                     )
                     Text(
                         text  = "$${"%.2f".format(goal.remainingAmount)}",
-                        style = ZeltaTypography.headlineMedium,
+                        style = ZeltaTypography.headlineSmall,
                         color = ZeltaTextSecondary
                     )
                 }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Progress Bar
-            LinearProgressIndicator(
-                progress      = { animatedProgress },
-                modifier      = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(100.dp)),
-                color         = ZeltaIndigo,
-                trackColor    = ZeltaBgElevated,
-                strokeCap     = StrokeCap.Round
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            Row(
-                modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text  = "${"%.0f".format(goal.progressPercent * 100)}% complete",
-                    style = ZeltaTypography.labelMedium,
-                    color = ZeltaIndigoLight
-                )
-                Text(
-                    text  = "Target: $${"%.2f".format(goal.targetAmount)}",
-                    style = ZeltaTypography.labelMedium,
-                    color = ZeltaTextDim
-                )
             }
 
             if (!goal.isCompleted) {
@@ -422,43 +459,42 @@ private fun EmptyGoalsState(
         modifier         = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        ZeltaElevatedCard(
-            modifier     = Modifier.padding(40.dp),
-            cornerRadius = 24.dp
+        Column(
+            modifier = Modifier
+                .padding(40.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(ZeltaBgCard)
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier            = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text  = if (tab == GoalTab.ACTIVE) "🎯" else "🏆",
-                    style = ZeltaTypography.displayMedium
+            Text(
+                text  = if (tab == GoalTab.ACTIVE) "🎯" else "🏆",
+                style = ZeltaTypography.displayMedium
+            )
+            Text(
+                text  = if (tab == GoalTab.ACTIVE) "No active goals"
+                else "No completed goals yet",
+                style = ZeltaTypography.headlineSmall,
+                color = ZeltaTextPrimary
+            )
+            Text(
+                text  = if (tab == GoalTab.ACTIVE)
+                    "Set a goal and start saving" else "Complete a goal to see it here",
+                style = ZeltaTypography.bodyMedium,
+                color = ZeltaTextDim
+            )
+            if (tab == GoalTab.ACTIVE) {
+                Spacer(Modifier.height(8.dp))
+                ZeltaPrimaryButton(
+                    text    = "Create Goal",
+                    onClick = onAddGoal
                 )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text  = if (tab == GoalTab.ACTIVE)
-                        "No active goals" else "No completed goals yet",
-                    style = ZeltaTypography.headlineSmall,
-                    color = ZeltaTextPrimary
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text  = if (tab == GoalTab.ACTIVE)
-                        "Set a goal and start saving" else "Complete a goal to see it here",
-                    style = ZeltaTypography.bodyMedium,
-                    color = ZeltaTextSecondary
-                )
-                if (tab == GoalTab.ACTIVE) {
-                    Spacer(Modifier.height(16.dp))
-                    ZeltaPrimaryButton(
-                        text    = "Create Goal",
-                        onClick = onAddGoal
-                    )
-                }
             }
         }
     }
 }
+
 
 // Celebration Overlay
 @Composable
@@ -469,41 +505,48 @@ private fun GoalCelebrationOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ZeltaBgBase.copy(alpha = 0.9f)),
+            .background(ZeltaBgBase.copy(alpha = 0.95f))
+            .clickable{ onDismiss() },
         contentAlignment = Alignment.Center
     ) {
-        ZeltaCard(
-            modifier     = Modifier.padding(32.dp),
-            cornerRadius = 28.dp
+        Column(
+            modifier = Modifier
+                .padding(32.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            ZeltaIndigo.copy(alpha = 0.3f),
+                            ZeltaBgCard
+                        )
+                    )
+                )
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier            = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector        = Icons.Rounded.EmojiEvents,
-                    contentDescription = null,
-                    tint               = ZeltaWarning,
-                    modifier           = Modifier.size(56.dp)
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text  = "Goal Complete! 🎉",
-                    style = ZeltaTypography.headlineLarge,
-                    color = ZeltaTextPrimary
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text  = "You hit your target for\n\"${goal.name}\"",
-                    style = ZeltaTypography.bodyLarge,
-                    color = ZeltaTextSecondary
-                )
-                Spacer(Modifier.height(24.dp))
-                ZeltaPrimaryButton(
-                    text    = "Celebrate! 🥳",
-                    onClick = onDismiss
-                )
-            }
+            Text(text = "🎉", style = ZeltaTypography.displayLarge)
+            Icon(
+                imageVector        = Icons.Rounded.EmojiEvents,
+                contentDescription = null,
+                tint               = ZeltaWarning,
+                modifier           = Modifier.size(48.dp)
+            )
+            Text(
+                text  = "Goal Complete!",
+                style = ZeltaTypography.headlineLarge,
+                color = ZeltaTextPrimary
+            )
+            Text(
+                text  = "You hit your target for\n\"${goal.name}\"",
+                style = ZeltaTypography.bodyLarge,
+                color = ZeltaTextSecondary
+            )
+            Spacer(Modifier.height(8.dp))
+            ZeltaPrimaryButton(
+                text    = "Celebrate! 🥳",
+                onClick = onDismiss
+            )
         }
     }
 }

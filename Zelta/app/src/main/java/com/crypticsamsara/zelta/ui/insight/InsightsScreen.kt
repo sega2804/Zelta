@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,19 +51,28 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 import com.crypticsamsara.zelta.ui.theme.ZeltaWarning
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import kotlin.collections.find
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
+import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
+import kotlin.collections.forEach
+import androidx.compose.ui.tooling.preview.Preview
+import com.crypticsamsara.zelta.domain.model.DefaultCategories
+import com.crypticsamsara.zelta.ui.theme.ZeltaTheme
 
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    InsightsScreenContent(uiState = uiState)
+}
 
+@Composable
+private fun InsightsScreenContent(
+    uiState: InsightsUiState
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -115,24 +123,24 @@ fun InsightsScreen(
                 CategoryBreakDownCard(
                     categoryTotals = uiState.categoryTotals,
                     categories = uiState.categories,
-                    totalSpent = uiState.totalSpent
+                    totalSpent = uiState.totalSpent ?: 0.0
                 )
             }
         }
 
         // score tip
-            uiState.financeScore?.let { score ->
-                item {
-                    ScoreTipCard(tip = score.tip)
-                }
+        uiState.financeScore?.let { score ->
+            item {
+                ScoreTipCard(tip = score.tip)
             }
+        }
     }
 }
 
 @Composable
 private fun InsightsHeader(
     month: String,
-    totalSpent: Double
+    totalSpent: Double?
 ) {
     Column {
         Text(
@@ -145,8 +153,8 @@ private fun InsightsHeader(
 
 @Composable
 private fun MonthComparisonCard(
-    totalSpent: Double,
-    lastMonthTotal: Double,
+    totalSpent: Double?,
+    lastMonthTotal: Double?,
     deltaPercent: Float,
     isSpendingUp: Boolean
 ) {
@@ -187,27 +195,29 @@ private fun MonthComparisonCard(
         Spacer(Modifier.height(12.dp))
 
         // Delta chip
-        if (lastMonthTotal > 0) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100.dp))
-                        .background(
-                            if (isSpendingUp) ZeltaDanger.copy(alpha = 0.15f)
-                            else ZeltaMint.copy(alpha = 015f)
-                        )
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+        if (lastMonthTotal != null) {
+            if (lastMonthTotal > 0) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text  = "${if (isSpendingUp) "↑" else "↓"} ${"%.1f".format(
-                            abs(deltaPercent)
-                        )}% vs last month",
-                        style = ZeltaTypography.labelLarge,
-                        color = if (isSpendingUp) ZeltaDanger else ZeltaMint
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(100.dp))
+                            .background(
+                                if (isSpendingUp) ZeltaDanger.copy(alpha = 0.15f)
+                                else ZeltaMint.copy(alpha = 0.15f)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text  = "${if (isSpendingUp) "↑" else "↓"} ${"%.1f".format(
+                                abs(deltaPercent)
+                            )}% vs last month",
+                            style = ZeltaTypography.labelLarge,
+                            color = if (isSpendingUp) ZeltaDanger else ZeltaMint
+                        )
+                    }
                 }
             }
         }
@@ -216,10 +226,36 @@ private fun MonthComparisonCard(
 
 @Composable
 private fun FinanceScoreCard(score: FinanceScore) {
-    ZeltaCard(
-        cornerRadius    = 20.dp,
-        backgroundColor = Color(0xFF0D0D20)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF1A1040),
+                        Color(0xFF0D0D20)
+                    )
+                )
+            )
+            .padding(24.dp)
     ) {
+        // Background glow
+        Box(
+            modifier = Modifier
+                .size(180.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            ZeltaIndigoGlow,
+                            Color.Transparent
+                        )
+                    ),
+                    CircleShape
+                )
+                .align(Alignment.TopEnd)
+        )
+
         Row(
             modifier              = Modifier.fillMaxWidth(),
             verticalAlignment     = Alignment.CenterVertically,
@@ -227,8 +263,8 @@ private fun FinanceScoreCard(score: FinanceScore) {
         ) {
             // Score circle
             Box(
-                modifier         = Modifier
-                    .size(88.dp)
+                modifier = Modifier
+                    .size(96.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -268,11 +304,11 @@ private fun FinanceScoreCard(score: FinanceScore) {
                         ScoreGrade.POOR      -> ZeltaDanger
                     }
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    text  = score.tip,
-                    style = ZeltaTypography.bodySmall,
-                    color = ZeltaTextSecondary,
+                    text     = score.tip,
+                    style    = ZeltaTypography.bodySmall,
+                    color    = ZeltaTextSecondary,
                     maxLines = 2
                 )
             }
@@ -293,59 +329,71 @@ private fun WeeklySpendCard(
     )
     LaunchedEffect(Unit) { animationPlayed = true }
 
-    ZeltaCard(cornerRadius = 20.dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(ZeltaBgCard)
+            .padding(20.dp)
+    ) {
         Column {
             Text(
                 text  = "LAST 7 DAYS",
                 style = ZeltaTypography.labelSmall,
                 color = ZeltaTextDim
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
-            val maxSpend = weeklySpend.values.maxOrNull() ?: 1.0
+            val maxSpend = weeklySpend.values.maxOrNull()?.takeIf { it > 0 } ?: 1.0
 
             Row(
                 modifier              = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    .height(130.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment     = Alignment.Bottom
             ) {
-                weeklySpend.entries.forEach { (day, spend) ->
-                    val barHeight = if (maxSpend == 0.0) 0f
-                    else (spend / maxSpend).toFloat()
-                    val isToday  = day == weeklySpend.keys.last()
+                weeklySpend.entries.forEachIndexed { index, (day, spend) ->
+                    val barHeight    = (spend / maxSpend).toFloat()
+                    val isToday      = index == weeklySpend.size - 1
+                    val animatedBar  = barHeight * animatedProgress
 
                     Column(
                         modifier            = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
-                        // Bar
+                        if (spend > 0) {
+                            Text(
+                                text  = "$${"%.0f".format(spend)}",
+                                style = ZeltaTypography.labelSmall,
+                                color = if (isToday) ZeltaIndigoLight else ZeltaTextDim
+                            )
+                            Spacer(Modifier.height(4.dp))
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height((100 * barHeight * animatedProgress).dp)
-                                .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                .height((110 * animatedBar).dp.coerceAtLeast(4.dp))
+                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                                 .background(
                                     if (isToday)
-                                        Brush.linearGradient(
-                                            listOf(ZeltaIndigo, ZeltaIndigoLight)
+                                        Brush.verticalGradient(
+                                            listOf(ZeltaIndigoLight, ZeltaIndigo)
                                         )
-                                    else Brush.linearGradient(
+                                    else Brush.verticalGradient(
                                         listOf(
-                                            ZeltaIndigo.copy(alpha = 0.4f),
-                                            ZeltaIndigo.copy(alpha = 0.3f)
+                                            ZeltaIndigo.copy(alpha = 0.5f),
+                                            ZeltaIndigo.copy(alpha = 0.2f)
                                         )
                                     )
                                 )
                         )
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(8.dp))
                         Text(
                             text  = day,
                             style = ZeltaTypography.labelSmall,
-                            color = if (isToday) ZeltaIndigoLight
-                            else ZeltaTextDim
+                            color = if (isToday) ZeltaIndigoLight else ZeltaTextDim
                         )
                     }
                 }
@@ -461,5 +509,40 @@ private fun ScoreTipCard(tip: String) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun InsightsScreenPreview() {
+    ZeltaTheme {
+        InsightsScreenContent(
+            uiState = InsightsUiState(
+                isLoading = false,
+                totalSpent = 1250.0,
+                lastMonthTotal = 1100.0,
+                financeScore = FinanceScore(
+                    score = 82,
+                    grade = ScoreGrade.GOOD,
+                    tip = "Great work! Keep tracking and stay consistent to hit 90+."
+                ),
+                weeklySpend = mapOf(
+                    "Mon" to 45.0,
+                    "Tue" to 30.0,
+                    "Wed" to 120.0,
+                    "Thu" to 60.0,
+                    "Fri" to 200.0,
+                    "Sat" to 150.0,
+                    "Sun" to 80.0
+                ),
+                categoryTotals = listOf(
+                    CategoryTotal("food", 450.0),
+                    CategoryTotal("rent", 500.0),
+                    CategoryTotal("fun", 200.0),
+                    CategoryTotal("transport", 100.0)
+                ),
+                categories = DefaultCategories
+            )
+        )
     }
 }

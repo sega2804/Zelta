@@ -95,8 +95,8 @@ class InsightsViewModel @Inject constructor(
                 InsightsUiState(
                     isLoading = false,
                     expenses = expenses,
-                    totalSpent = totalSpent,
-                    lastMonthTotal = lastMonthTotal,
+                    totalSpent = totalSpent ?: 0.0,
+                    lastMonthTotal = lastMonthTotal ?: 0.0,
                     categoryTotals = categoryTotals,
                     categories = categories,
                     budgets = budgets,

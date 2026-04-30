@@ -14,8 +14,8 @@ data class InsightsUiState(
     val categoryTotals: List<CategoryTotal> = emptyList(),
     val categories: List<Category> = emptyList(),
     val budgets: List<Budget> = emptyList(),
-    val totalSpent: Double? = 0.0,
-    val lastMonthTotal: Double? = 0.0,
+    val totalSpent: Double = 0.0,
+    val lastMonthTotal: Double = 0.0,
     val financeScore: FinanceScore? = null,
     val weeklySpend: Map<String, Double> = emptyMap(),
     val errorMessage: String? = null

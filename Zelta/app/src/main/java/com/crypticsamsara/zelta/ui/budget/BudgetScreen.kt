@@ -53,6 +53,7 @@ import com.crypticsamsara.zelta.ui.component.ZeltaCard
 import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
 import com.crypticsamsara.zelta.ui.component.ZeltaPrimaryButton
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
+import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
 import com.crypticsamsara.zelta.ui.theme.ZeltaDanger
 import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
@@ -224,82 +225,110 @@ private fun BudgetHeader(
     )
     LaunchedEffect(Unit) { animationPlayed = true }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Budget",
-            style = ZeltaTypography.headlineLarge,
-            color = ZeltaTextPrimary
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = month,
-            style = ZeltaTypography.headlineLarge,
-            color = ZeltaTextPrimary
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = month,
-            style = ZeltaTypography.bodyMedium,
-            color = ZeltaTextSecondary
-        )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(ZeltaBgCard)
+            .padding(22.dp)
+    ) {
+
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Budget",
+                    style = ZeltaTypography.headlineLarge,
+                    color = ZeltaTextPrimary
+                )
+                Text(
+                    text = month,
+                    style = ZeltaTypography.headlineLarge,
+                    color = ZeltaTextPrimary
+                )
+            }
+            // Usage badge
+            if (totalLimit > 0) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            when {
+                                overallUsage >= 1f   -> ZeltaDanger.copy(alpha = 0.15f)
+                                overallUsage >= 0.8f -> ZeltaWarning.copy(alpha = 0.15f)
+                                else                 -> ZeltaMint.copy(alpha = 0.12f)
+                            }
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text  = "${"%.0f".format(overallUsage * 100)}%",
+                        style = ZeltaTypography.headlineSmall,
+                        color = when {
+                            overallUsage >= 1f   -> ZeltaDanger
+                            overallUsage >= 0.8f -> ZeltaWarning
+                            else                 -> ZeltaMint
+                        }
+                    )
+                }
+            }
+        }
 
         if (totalLimit > 0) {
             Spacer(Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
                     Text(
-                        text = "SPENT",
+                        text  = "SPENT",
                         style = ZeltaTypography.labelSmall,
                         color = ZeltaTextDim
                     )
                     Text(
-                        text = "$${"%.2f".format(totalSpent)}",
+                        text  = "$${"%.2f".format(totalSpent)}",
                         style = ZeltaTypography.displaySmall,
                         color = ZeltaTextPrimary
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "TOTAL LIMIT",
+                        text  = "LIMIT",
                         style = ZeltaTypography.labelSmall,
                         color = ZeltaTextDim
                     )
                     Text(
-                        text = "$${"%.2f".format(totalLimit)}",
+                        text  = "$${"%.2f".format(totalLimit)}",
                         style = ZeltaTypography.displaySmall,
                         color = ZeltaTextSecondary
                     )
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(14.dp))
 
             LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.fillMaxWidth()
+                progress   = { animatedProgress },
+                modifier   = Modifier
+                    .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(100.dp)),
-                color = when {
-                    overallUsage >= 1f -> ZeltaDanger
+                color      = when {
+                    overallUsage >= 1f   -> ZeltaDanger
                     overallUsage >= 0.8f -> ZeltaWarning
-                    else -> ZeltaMint
+                    else                 -> ZeltaMint
                 },
                 trackColor = ZeltaBgElevated,
-                strokeCap = StrokeCap.Round
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            Text(
-                text = "${"%.0f".format(overallUsage * 100)}% of total budget used",
-                style = ZeltaTypography.labelMedium,
-                color = ZeltaTextSecondary
+                strokeCap  = StrokeCap.Round
             )
         }
+    }
     }
 }
 
@@ -365,129 +394,138 @@ private fun BudgetEnvelopeCard(
         BudgetState.WARNING -> ZeltaWarning
     }
 
-    ZeltaCard(cornerRadius = 20.dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(ZeltaBgCard)
+            .padding(18.dp)
+    ) {
         Column {
-            // Top row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier              = Modifier.fillMaxWidth(),
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(14.dp))
                             .background(
-                                (category?.color ?: ZeltaIndigo).copy(alpha = 0.15f)
+                                (category?.color ?: ZeltaIndigo).copy(alpha = 0.12f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = category?.icon ?: "📦",
-                            style = ZeltaTypography.titleLarge
+                            text  = category?.icon ?: "📦",
+                            style = ZeltaTypography.headlineSmall
                         )
                     }
                     Column {
                         Text(
-                            text = category?.name ?: "Category",
+                            text  = category?.name ?: "Category",
                             style = ZeltaTypography.titleLarge,
                             color = ZeltaTextPrimary
                         )
-                        // State budget
+                        // State badge
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(stateColor.copy(alpha = 0.12f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
                             Text(
-                                text = when (budget.budgetState) {
-                                    BudgetState.HEALTHY -> "On track ✓"
+                                text  = when (budget.budgetState) {
+                                    BudgetState.HEALTHY  -> "On track ✓"
                                     BudgetState.WARNING  -> "Approaching limit"
                                     BudgetState.EXCEEDED -> "Over budget!"
                                 },
-                                style = ZeltaTypography.bodySmall,
+                                style = ZeltaTypography.labelSmall,
                                 color = stateColor
                             )
+                        }
                     }
                 }
 
                 Row {
                     IconButton(onClick = onEdit) {
                         Icon(
-                            imageVector = Icons.Rounded.Edit,
-                            contentDescription = "Edit Budget",
-                            tint = ZeltaTextDim,
-                            modifier = Modifier.size(18.dp)
+                            Icons.Rounded.Edit,
+                            contentDescription = "Edit",
+                            tint               = ZeltaTextDim,
+                            modifier           = Modifier.size(18.dp)
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = "Delete Budget",
-                            tint = ZeltaTextDim,
-                            modifier = Modifier.size(18.dp)
+                            Icons.Rounded.Delete,
+                            contentDescription = "Delete",
+                            tint               = ZeltaTextDim,
+                            modifier           = Modifier.size(18.dp)
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Amount
+            LinearProgressIndicator(
+                progress   = { animatedProgress },
+                modifier   = Modifier
+                    .fillMaxWidth()
+                    .height(7.dp)
+                    .clip(RoundedCornerShape(100.dp)),
+                color      = stateColor,
+                trackColor = ZeltaBgElevated,
+                strokeCap  = StrokeCap.Round
+            )
+
+            Spacer(Modifier.height(12.dp))
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier              = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
                     Text(
-                        text = "SPENT",
+                        text  = "SPENT",
                         style = ZeltaTypography.labelSmall,
                         color = ZeltaTextDim
                     )
                     Text(
-                        text = "$${"%.2f".format(budget.spentAmount)}",
+                        text  = "$${"%.2f".format(budget.spentAmount)}",
+                        style = ZeltaTypography.headlineSmall,
+                        color = stateColor
+                    )
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text  = "USED",
+                        style = ZeltaTypography.labelSmall,
+                        color = ZeltaTextDim
+                    )
+                    Text(
+                        text  = "${"%.0f".format(budget.usagePercent * 100)}%",
                         style = ZeltaTypography.headlineSmall,
                         color = stateColor
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "REMAINING",
+                        text  = "REMAINING",
+                        style = ZeltaTypography.labelSmall,
+                        color = ZeltaTextDim
+                    )
+                    Text(
+                        text  = "$${"%.2f".format(budget.remainingAmount)}",
                         style = ZeltaTypography.headlineSmall,
                         color = ZeltaTextSecondary
                     )
                 }
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            // Progress Bar
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(100.dp)),
-                color = stateColor,
-                trackColor = ZeltaBgElevated,
-                strokeCap = StrokeCap.Round
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text  = "${"%.0f".format(budget.usagePercent * 100)}% used",
-                    style = ZeltaTypography.labelMedium,
-                    color = stateColor
-                )
-                Text(
-                    text  = "Limit: $${"%.2f".format(budget.limitAmount)}",
-                    style = ZeltaTypography.labelMedium,
-                    color = ZeltaTextDim
-                )
             }
         }
     }

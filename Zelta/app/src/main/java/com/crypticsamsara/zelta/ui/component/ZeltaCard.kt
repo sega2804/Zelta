@@ -21,6 +21,7 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
 import com.crypticsamsara.zelta.ui.theme.ZeltaBorder
 import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
+import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
 import com.patrykandpatrick.vico.core.component.shape.Shape
 
 // base card
@@ -38,16 +39,21 @@ fun ZeltaCard(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 8.dp,
+                elevation = 12.dp,
                 shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.4f),
-                spotColor = Color.Black.copy(alpha = 0.4f)
+                ambientColor = Color.Black.copy(alpha = 0.6f),
+                spotColor = Color.Black.copy(alpha = 0.5f)
             )
             .clip(shape)
             .background(backgroundColor)
             .border(
                 width = 1.dp,
-                color = ZeltaBorder,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.08f),
+                        Color.White.copy(alpha = 0.02f)
+                    )
+                ),
                 shape = shape
             )
             .then(
@@ -63,9 +69,11 @@ fun ZeltaCard(
 @Composable
 fun ZeltaGradientCard(
     modifier: Modifier = Modifier,
-    brush: Brush = Brush.linearGradientBrush(),
+    brush: Brush = Brush.linearGradient(
+        colors = listOf(Color(0xFF6C63FF), Color(0xFF4A3FCC))
+    ),
     cornerRadius: Dp = 24.dp,
-    onClick: (() -> Unit)?,
+    onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
@@ -74,13 +82,23 @@ fun ZeltaGradientCard(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 16.dp,
+                elevation = 24.dp,
                 shape = shape,
-                ambientColor = ZeltaIndigo.copy(alpha = 0.3f),
-                spotColor = ZeltaIndigo.copy(alpha = 0.3f)
+                ambientColor = ZeltaIndigoGlow,
+                spotColor = ZeltaIndigoGlow
             )
             .clip(shape)
             .background(brush)
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.2f),
+                        Color.White.copy(alpha = 0.0f)
+                    )
+                ),
+                shape = shape
+            )
             .then(
                 if (onClick != null) Modifier.clickable { onClick() }
                 else Modifier
@@ -106,11 +124,3 @@ fun ZeltaElevatedCard(
        content = content
    )
 }
-
-// gradient brush
-fun Brush.Companion.linearGradientBrush() = linearGradient(
-    colors = listOf(
-        Color(0xFF6C63FF),
-        Color(0xFF4A3FCC)
-    )
-)

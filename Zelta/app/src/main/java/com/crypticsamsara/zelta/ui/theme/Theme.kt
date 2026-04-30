@@ -73,7 +73,7 @@ private val ZeltaLightColorScheme = lightColorScheme(
     onError            = Color(0xFFFFFFFF),
 )
 
-// ── Zelta Theme
+// Zelta Theme
 @Composable
 fun ZeltaTheme(
     darkTheme: Boolean = ZeltaThemeState.isDarkMode,
