@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,6 +48,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -67,9 +69,7 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
 import com.crypticsamsara.zelta.ui.theme.ZeltaBorder
 import com.crypticsamsara.zelta.ui.theme.ZeltaBorderFocus
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoDark
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
+
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
@@ -78,6 +78,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import androidx.compose.ui.res.stringResource
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealDark
 
 @Composable
 fun AuthScreen(
@@ -141,45 +143,41 @@ fun AuthScreen(
             // Auth Card
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        color = ZeltaBgCard,
-                        shape = RoundedCornerShape(28.dp)
-                    )
-                    .padding(24.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(ZeltaBgCard)
+                    .padding(22.dp)
             ) {
-                // Tabs
-                val tabs = AuthTab.entries.toTypedArray()
-                TabRow(
-                    selectedTabIndex = tabs.indexOf(uiState.authTab),
-                    containerColor = ZeltaBgCard,
-                    contentColor = ZeltaIndigoLight,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(
-                                tabPositions[tabs.indexOf(uiState.authTab)]
-                            ),
-                            height = 2.dp,
-                            color = ZeltaIndigo
-                        )
-                    }
+                // Segment tabs
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(ZeltaBgElevated)
+                        .padding(3.dp)
                 ) {
-                    tabs.forEach { tab ->
-                        Tab(
-                            selected = tab == uiState.authTab,
-                            onClick = { viewModel.onTabSelected(tab) },
-                            text = {
-                                Text(
-                                    text = tab.label,
-                                    style = ZeltaTypography.titleMedium,
-                                    color = if (uiState.authTab == tab)
-                                            ZeltaIndigoLight else ZeltaTextDim
+                    AuthTab.values().forEach { tab ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(100.dp))
+                                .background(
+                                    if (uiState.authTab == tab) ZeltaBgCard
+                                    else Color.Transparent
                                 )
-                            }
-                        )
+                                .clickable { viewModel.onTabSelected(tab) }
+                                .padding(vertical = 9.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text  = tab.label,
+                                style = ZeltaTypography.titleMedium,
+                                color = if (uiState.authTab == tab)
+                                    ZeltaTextPrimary else ZeltaTextDim
+                            )
+                        }
                     }
                 }
-
                 Spacer(Modifier.height(24.dp))
 
                 // Animated form content
@@ -264,33 +262,34 @@ fun AuthScreen(
     }
 }
 
+// Zelta Logo
 @Composable
 private fun ZeltaLogo() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(72.dp)
+                .clip(RoundedCornerShape(22.dp))
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(ZeltaIndigo, ZeltaIndigoDark)
-                    ),
-                    shape = RoundedCornerShape(22.dp)
+                    Brush.linearGradient(
+                        colors = listOf(ZeltaTealDark, ZeltaTeal)
+                    )
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text  = "Z",
                 style = ZeltaTypography.displayMedium,
-                color = Color.White
+                color = Color(0xFF07080F)
             )
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(14.dp))
         Text(
             text  = "Zelta",
-            style = ZeltaTypography.displaySmall,
+            style = ZeltaTypography.headlineLarge,
             color = ZeltaTextPrimary
         )
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text  = "Smart money for smart students",
             style = ZeltaTypography.bodyMedium,
@@ -367,7 +366,7 @@ private fun SignInForm(
                 modifier         = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = ZeltaIndigo)
+                CircularProgressIndicator(color = ZeltaTealDark)
             }
         } else {
             ZeltaPrimaryButton(
@@ -469,7 +468,7 @@ private fun RegisterForm(
                 modifier         = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = ZeltaIndigo)
+                CircularProgressIndicator(color = ZeltaTealDark)
             }
         } else {
             ZeltaPrimaryButton(

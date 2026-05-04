@@ -33,8 +33,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 
@@ -129,9 +129,9 @@ fun ZeltaBottomBar(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = ZeltaIndigoLight,
-                    selectedTextColor = ZeltaIndigoLight,
-                    indicatorColor = ZeltaIndigo.copy(alpha = 0.15f),
+                    selectedIconColor = ZeltaTealLight,
+                    selectedTextColor = ZeltaTealLight,
+                    indicatorColor = ZeltaTeal.copy(alpha = 0.15f),
                     unselectedIconColor = ZeltaTextDim,
                     unselectedTextColor = ZeltaTextDim
                 )

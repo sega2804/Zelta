@@ -104,7 +104,7 @@ class GetTotalSpentByMonthUseCase @Inject constructor(
 ){
     operator fun invoke(
         monthYear: String = YearMonth.now().toString()
-    ):Flow<Double?> =
+    ): Flow<Double> =
         expenseRepository.getTotalSpentByMonth(monthYear)
 }
 

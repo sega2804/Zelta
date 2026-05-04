@@ -45,8 +45,8 @@ import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
 import com.crypticsamsara.zelta.ui.theme.ZeltaBorder
 import com.crypticsamsara.zelta.ui.theme.ZeltaBorderFocus
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
@@ -140,7 +140,7 @@ fun AddExpenseSheet(
                 },
                 isError       = amountError != null,
                 supportingText = amountError?.let {
-                    { Text(it, color = ZeltaIndigo) }
+                    { Text(it, color = ZeltaTeal) }
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
@@ -190,7 +190,7 @@ fun AddExpenseSheet(
                 Text(
                     text  = it,
                     style = ZeltaTypography.bodySmall,
-                    color = ZeltaIndigo,
+                    color = ZeltaTeal,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -231,7 +231,7 @@ fun AddExpenseSheet(
                     modifier         = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = ZeltaIndigo)
+                    CircularProgressIndicator(color = ZeltaTeal)
                 }
             } else {
                 ZeltaPrimaryButton(

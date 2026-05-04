@@ -11,13 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
-import com.crypticsamsara.zelta.ui.theme.ZeltaBorder
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
-import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealGlow
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealLight
+import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
+
+private val PillShape = RoundedCornerShape(100.dp)
 
 @Composable
 fun ZeltaChip(
@@ -25,28 +28,23 @@ fun ZeltaChip(
     selected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val backgroundColor = if (selected)
-        ZeltaIndigo.copy(alpha = 0.2f) else ZeltaBgElevated
-    val borderColor = if (selected)
-        ZeltaIndigo else ZeltaBorder
-    val textColor = if (selected)
-        ZeltaIndigoLight else ZeltaTextSecondary
-
-    val shape = RoundedCornerShape(100.dp)
+    val bg     = if (selected) ZeltaTealGlow else ZeltaBgElevated
+    val border = if (selected) ZeltaTeal else Color.Transparent
+    val text   = if (selected) ZeltaTealLight else ZeltaTextDim
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .clip(shape)
-            .background(backgroundColor)
-            .border(1.dp, borderColor, shape)
+        modifier         = Modifier
+            .clip(PillShape)
+            .background(bg)
+            .border(1.dp, border, PillShape)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 14.dp, vertical = 7.dp)
     ) {
         Text(
-            text = label,
+            text  = label,
             style = ZeltaTypography.labelLarge,
-            color = textColor
+            color = text
         )
     }
 }

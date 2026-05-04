@@ -1,6 +1,6 @@
 package com.crypticsamsara.zelta.ui.home
 
-
+import android.graphics.Color.parseColor
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.FloatingActionButton
@@ -41,7 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,16 +51,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.crypticsamsara.zelta.domain.model.Expense
 import com.crypticsamsara.zelta.domain.model.Goal
 import com.crypticsamsara.zelta.domain.model.SyncState
+import com.crypticsamsara.zelta.domain.usecase.FinanceScore
+import com.crypticsamsara.zelta.ui.component.ZeltaCard
+import com.crypticsamsara.zelta.ui.component.ZeltaHeroCard
 import com.crypticsamsara.zelta.ui.component.HomeShimmer
+import com.crypticsamsara.zelta.ui.home.QuickActionsRow
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
+import com.crypticsamsara.zelta.ui.theme.ZeltaBorder
+import com.crypticsamsara.zelta.ui.theme.ZeltaCoral
+import com.crypticsamsara.zelta.ui.theme.ZeltaCoralLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaDanger
 import com.crypticsamsara.zelta.ui.theme.ZeltaExpense
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
-import com.crypticsamsara.zelta.ui.theme.ZeltaMint
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealDark
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealGlow
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
@@ -80,31 +89,89 @@ fun HomeScreen(
             .fillMaxSize()
             .background(ZeltaBgBase)
     ) {
-        // Background glow effects
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            ZeltaIndigoGlow,
-                            Color.Transparent
-                        )
-                    ),
-                    CircleShape
-                )
-                .align(Alignment.TopEnd)
-        )
-
         if (uiState.isLoading) {
             HomeShimmer()
         } else {
-            HomeContent(
-                uiState          = uiState,
-                onAddExpense     = onAddExpense,
-                onSeeAllExpenses = onSeeAllExpenses,
-                onGoalClick      = onGoalClick
-            )
+            LazyColumn(
+                modifier       = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start  = 20.dp,
+                    end    = 20.dp,
+                    top    = 20.dp,
+                    bottom = 110.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    HomeHeader(
+                        greeting  = uiState.greeting,
+                        userName  = uiState.userName.ifBlank { "there" },
+                        syncState = uiState.syncState
+                    )
+                }
+
+                item {
+                    FinanceScoreHeroCard(
+                        financeScore = uiState.financeScore
+                    )
+                }
+
+                item {
+                    QuickActionsRow(
+                        dailySpend       = uiState.totalSpentThisMonth / 30,
+                        remainingBudget  = (uiState.totalBudgetLimit - uiState.totalSpentThisMonth)
+                            .coerceAtLeast(0.0),
+                        onAddExpense     = onAddExpense
+                    )
+                }
+
+                item {
+                    WeeklySpendCard(uiState = uiState)
+                }
+
+                if (uiState.activeGoals.isNotEmpty()) {
+                    item {
+                        SectionHeader(
+                            title    = "ACTIVE GOALS",
+                            action   = null,
+                            onAction = {}
+                        )
+                    }
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            contentPadding        = PaddingValues(horizontal = 2.dp)
+                        ) {
+                            items(uiState.activeGoals) { goal ->
+                                GoalProgressCard(
+                                    goal    = goal,
+                                    onClick = { onGoalClick(goal.id) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    SectionHeader(
+                        title    = "RECENT TRANSACTIONS",
+                        action   = "See all",
+                        onAction = onSeeAllExpenses
+                    )
+                }
+
+                if (uiState.recentExpenses.isEmpty()) {
+                    item { EmptyTransactionsHint(onAddExpense) }
+                } else {
+                    items(uiState.recentExpenses) { expense ->
+                        TransactionItem(expense = expense)
+                    }
+                }
+
+                uiState.financeScore?.let { score ->
+                    item { InsightTipCard(tip = score.tip) }
+                }
+            }
         }
 
         FloatingActionButton(
@@ -112,102 +179,24 @@ fun HomeScreen(
             modifier       = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
-            shape          = RoundedCornerShape(20.dp),
-            containerColor = ZeltaIndigo,
-            contentColor   = Color.White
+            shape          = RoundedCornerShape(100.dp),
+            containerColor = ZeltaTeal,
+            contentColor   = Color(0xFF07080F)
         ) {
             Icon(
                 imageVector        = Icons.Rounded.Add,
                 contentDescription = "Add Expense",
-                modifier           = Modifier.size(26.dp)
+                modifier           = Modifier.size(24.dp)
             )
         }
     }
 }
 
-@Composable
-private fun HomeContent(
-    uiState: HomeUiState,
-    onAddExpense: () -> Unit,
-    onSeeAllExpenses: () -> Unit,
-    onGoalClick: (String) -> Unit
-) {
-    LazyColumn(
-        modifier       = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start  = 20.dp,
-            end    = 20.dp,
-            top    = 24.dp,
-            bottom = 110.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-
-        item {
-            HomeHeader(
-                greeting  = uiState.greeting,
-                userName  = uiState.userName.ifBlank { "there" },
-                month     = uiState.currentMonth
-                    .format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                syncState = uiState.syncState
-            )
-        }
-
-        item { BalanceCard(uiState = uiState) }
-
-        item { QuickStatsRow(uiState = uiState) }
-
-        if (uiState.activeGoals.isNotEmpty()) {
-            item {
-                SectionHeader(
-                    title    = "ACTIVE GOALS",
-                    action   = null,
-                    onAction = {}
-                )
-            }
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding        = PaddingValues(horizontal = 2.dp)
-                ) {
-                    items(uiState.activeGoals) { goal ->
-                        GoalProgressCard(
-                            goal    = goal,
-                            onClick = { onGoalClick(goal.id) }
-                        )
-                    }
-                }
-            }
-        }
-
-        item {
-            SectionHeader(
-                title    = "RECENT",
-                action   = "See all",
-                onAction = onSeeAllExpenses
-            )
-        }
-
-        if (uiState.recentExpenses.isEmpty()) {
-            item { EmptyExpensesHint(onAddExpense) }
-        } else {
-            items(uiState.recentExpenses) { expense ->
-                ExpenseItem(expense = expense)
-            }
-        }
-
-        uiState.financeScore?.let { score ->
-            item { ScoreTipCard(tip = score.tip) }
-        }
-    }
-}
-
-// Header
+//  Header 
 @Composable
 private fun HomeHeader(
     greeting: String,
     userName: String,
-    month: String,
     syncState: SyncState
 ) {
     Row(
@@ -221,37 +210,33 @@ private fun HomeHeader(
                 style = ZeltaTypography.bodyMedium,
                 color = ZeltaTextSecondary
             )
-            Spacer(Modifier.height(2.dp))
             Text(
                 text  = userName,
                 style = ZeltaTypography.headlineLarge,
                 color = ZeltaTextPrimary
             )
         }
-
         Row(
             verticalAlignment     = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Sync dot
             Box(
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
                     .background(
                         when (syncState) {
-                            SyncState.SYNCED  -> ZeltaMint
+                            SyncState.SYNCED  -> ZeltaTeal
                             SyncState.PENDING -> ZeltaWarning
                             SyncState.FAILED  -> ZeltaDanger
                         }
                     )
             )
-
             Box(
-                modifier = Modifier
-                    .size(42.dp)
+                modifier         = Modifier
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(ZeltaBgElevated),
+                    .background(ZeltaBgCard),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -265,197 +250,239 @@ private fun HomeHeader(
     }
 }
 
-// Balance Card
+// Finance Score Hero 
 @Composable
-private fun BalanceCard(uiState: HomeUiState) {
-    var animationPlayed by remember { mutableStateOf(false) }
-    val animatedProgress by animateFloatAsState(
-        targetValue   = if (animationPlayed) uiState.overallBudgetUsage else 0f,
-        animationSpec = tween(1200),
-        label         = "budget_progress"
-    )
-    LaunchedEffect(Unit) { animationPlayed = true }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF2A1FCC),
-                        Color(0xFF6C63FF),
-                        Color(0xFF8B5CF6)
-                    )
-                )
+private fun FinanceScoreHeroCard(financeScore: FinanceScore?) {
+    ZeltaHeroCard {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text  = "FINANCE SCORE",
+                style = ZeltaTypography.labelSmall,
+                color = Color.White.copy(alpha = 0.45f)
             )
-            .padding(24.dp)
-    ) {
-        // Decorative circles
-        Box(
-            modifier = Modifier
-                .size(180.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.04f))
-                .align(Alignment.TopEnd)
-        )
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.04f))
-                .align(Alignment.BottomStart)
-        )
+            Spacer(Modifier.height(12.dp))
 
-        Column {
-            Row(
-                modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment     = Alignment.CenterVertically
+            // Score ring
+            Box(
+                modifier         = Modifier.size(100.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column {
-                    Text(
-                        text  = "SPENT THIS MONTH",
-                        style = ZeltaTypography.labelSmall,
-                        color = Color.White.copy(alpha = 0.6f)
+                androidx.compose.foundation.Canvas(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val stroke = Stroke(
+                        width = 8.dp.toPx(),
+                        cap = StrokeCap.Round
                     )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text  = "$${"%.2f".format(uiState.totalSpentThisMonth)}",
-                        style = ZeltaTypography.displayLarge,
-                        color = Color.White
+                    val score      = financeScore?.score ?: 0
+                    val sweep      = (score / 100f) * 270f
+                    val startAngle = 135f
+
+                    drawArc(
+                        color      = Color.White.copy(alpha = 0.08f),
+                        startAngle = startAngle,
+                        sweepAngle = 270f,
+                        useCenter  = false,
+                        style      = stroke
+                    )
+                    drawArc(
+                        brush      = Brush.linearGradient(
+                            colors = listOf(
+                                Color(parseColor("#FF6B4A")),
+                                Color(parseColor("#00E8C0"))
+                            )
+                        ),
+                        startAngle = startAngle,
+                        sweepAngle = sweep,
+                        useCenter  = false,
+                        style      = stroke
                     )
                 }
 
-                // Score bubble
-                uiState.financeScore?.let { score ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .padding(horizontal = 14.dp, vertical = 10.dp)
-                    ) {
-                        Text(
-                            text  = score.score.toString(),
-                            style = ZeltaTypography.headlineMedium,
-                            color = Color.White
-                        )
-                        Text(
-                            text  = "SCORE",
-                            style = ZeltaTypography.labelSmall,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "🧑", style = ZeltaTypography.titleLarge)
+                    Text(
+                        text  = "${financeScore?.score ?: 0}",
+                        style = ZeltaTypography.headlineMedium,
+                        color = Color.White
+                    )
+                    Text(
+                        text  = "/100",
+                        style = ZeltaTypography.bodySmall,
+                        color = Color.White.copy(alpha = 0.4f)
+                    )
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Progress bar
-            LinearProgressIndicator(
-                progress      = { animatedProgress },
-                modifier      = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(100.dp)),
-                color         = ZeltaMint,
-                trackColor    = Color.White.copy(alpha = 0.15f),
-                strokeCap     = StrokeCap.Round
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            Row(
-                modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (uiState.totalBudgetLimit > 0) {
-                    Text(
-                        text  = "Budget $${"%.0f".format(uiState.totalBudgetLimit)}",
-                        style = ZeltaTypography.bodySmall,
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text  = "${"%.0f".format(uiState.overallBudgetUsage * 100)}% used",
-                        style = ZeltaTypography.bodySmall,
-                        color = ZeltaMint
-                    )
-                } else {
-                    Text(
-                        text  = "No budget set yet",
-                        style = ZeltaTypography.bodySmall,
-                        color = Color.White.copy(alpha = 0.5f)
-                    )
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text  = "Tip: ",
+                    style = ZeltaTypography.bodyMedium,
+                    color = ZeltaCoralLight,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text     = financeScore?.tip ?: "Keep tracking your expenses daily.",
+                    style    = ZeltaTypography.bodyMedium,
+                    color    = Color.White.copy(alpha = 0.65f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
 }
 
-// Quick Stats
+// Quick Actions
 @Composable
-private fun QuickStatsRow(uiState: HomeUiState) {
+private fun QuickActionsRow(
+    dailySpend: Double,
+    remainingBudget: Double,
+    onAddExpense: () -> Unit
+) {
     Row(
-        modifier              = Modifier.fillMaxWidth(),
+        modifier            = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        StatCard(
-            modifier = Modifier.weight(1f),
-            emoji    = "🎯",
-            label    = "Goals",
-            value    = "${uiState.activeGoals.size}",
-            color    = ZeltaIndigo
-        )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            emoji    = "🗂",
-            label    = "Budgets",
-            value    = "${uiState.budgets.size}",
-            color    = ZeltaMint
-        )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            emoji    = "✨",
-            label    = "Score",
-            value    = "${uiState.financeScore?.score ?: 0}",
-            color    = when {
-                (uiState.financeScore?.score ?: 0) >= 85 -> ZeltaMint
-                (uiState.financeScore?.score ?: 0) >= 65 -> ZeltaIndigoLight
-                (uiState.financeScore?.score ?: 0) >= 45 -> ZeltaWarning
-                else                                      -> ZeltaDanger
+        ZeltaCard(
+            modifier     = Modifier.weight(1f),
+            cornerRadius = 14.dp
+        ) {
+            Column {
+                Text(
+                    text  = "DAILY SPEND",
+                    style = ZeltaTypography.labelSmall,
+                    color = ZeltaTextDim
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text  = "$${"%.2f".format(dailySpend)}",
+                    style = ZeltaTypography.headlineSmall,
+                    color = ZeltaTextPrimary
+                )
             }
-        )
+        }
+
+        ZeltaCard(
+            modifier     = Modifier.weight(1f),
+            cornerRadius = 14.dp
+        ) {
+            Column {
+                Text(
+                    text  = "REMAINING",
+                    style = ZeltaTypography.labelSmall,
+                    color = ZeltaTextDim
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text  = "$${"%.2f".format(remainingBudget)}",
+                    style = ZeltaTypography.headlineSmall,
+                    color = ZeltaTeal
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(ZeltaTealDark, ZeltaTeal)
+                    )
+                )
+                .clickable { onAddExpense() }
+                .padding(14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text  = "+",
+                    style = ZeltaTypography.headlineMedium,
+                    color = Color(0xFF07080F),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text  = "Add",
+                    style = ZeltaTypography.labelSmall,
+                    color = Color(0xFF07080F)
+                )
+            }
+        }
     }
 }
 
+// Weekly Chart
 @Composable
-private fun StatCard(
-    modifier: Modifier,
-    emoji: String,
-    label: String,
-    value: String,
-    color: Color
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(ZeltaBgCard)
-            .padding(14.dp)
-    ) {
+private fun WeeklySpendCard(uiState: HomeUiState) {
+    var animationPlayed by remember { mutableStateOf(false) }
+    val animatedProgress by animateFloatAsState(
+        targetValue   = if (animationPlayed) 1f else 0f,
+        animationSpec = tween(1000),
+        label         = "weekly"
+    )
+    LaunchedEffect(Unit) { animationPlayed = true }
+
+    ZeltaCard {
         Column {
-            Text(text = emoji, style = ZeltaTypography.titleLarge)
-            Spacer(Modifier.height(8.dp))
             Text(
-                text  = value,
-                style = ZeltaTypography.headlineMedium,
-                color = color
+                text  = "Weekly Spending",
+                style = ZeltaTypography.headlineSmall,
+                color = ZeltaTextPrimary
             )
-            Text(
-                text  = label,
-                style = ZeltaTypography.labelSmall,
-                color = ZeltaTextDim
-            )
+            Spacer(Modifier.height(14.dp))
+
+            val weeklyData = uiState.categoryTotals
+            val maxVal     = 100.0
+
+            Row(
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment     = Alignment.Bottom
+            ) {
+                val days    = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+                val heights = listOf(0.35f, 0.55f, 0.40f, 0.20f, 0.80f, 0.55f, 0.15f)
+
+                days.forEachIndexed { index, day ->
+                    val isToday  = index == 4
+                    val barH     = heights[index] * animatedProgress
+
+                    Column(
+                        modifier            = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height((70 * barH).dp.coerceAtLeast(4.dp))
+                                .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                .background(
+                                    if (isToday)
+                                        Brush.verticalGradient(
+                                            listOf(ZeltaTealLight, ZeltaTeal)
+                                        )
+                                    else Brush.verticalGradient(
+                                        listOf(
+                                            ZeltaTeal.copy(alpha = 0.35f),
+                                            ZeltaTeal.copy(alpha = 0.15f)
+                                        )
+                                    )
+                                )
+                        )
+                        Spacer(Modifier.height(5.dp))
+                        Text(
+                            text  = day,
+                            style = ZeltaTypography.labelSmall,
+                            color = if (isToday) ZeltaTeal else ZeltaTextDim
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -478,31 +505,20 @@ private fun SectionHeader(
             color = ZeltaTextDim
         )
         if (action != null) {
-            Row(
-                modifier          = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+            Text(
+                text     = "$action →",
+                style    = ZeltaTypography.labelLarge,
+                color    = ZeltaTeal,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
                     .clickable { onAction() }
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text  = action,
-                    style = ZeltaTypography.labelLarge,
-                    color = ZeltaIndigoLight
-                )
-                Icon(
-                    imageVector        = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                    contentDescription = null,
-                    tint               = ZeltaIndigoLight,
-                    modifier           = Modifier.size(10.dp)
-                )
-            }
+                    .padding(4.dp)
+            )
         }
     }
 }
 
-// Goal Card
+// Goal Progress Card
 @Composable
 private fun GoalProgressCard(
     goal: Goal,
@@ -518,11 +534,11 @@ private fun GoalProgressCard(
 
     Box(
         modifier = Modifier
-            .width(160.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .width(150.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(ZeltaBgCard)
             .clickable { onClick() }
-            .padding(16.dp)
+            .padding(14.dp)
     ) {
         Column {
             Row(
@@ -530,17 +546,15 @@ private fun GoalProgressCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.CenterVertically
             ) {
-                Text(
-                    text  = goal.icon,
-                    style = ZeltaTypography.headlineMedium
-                )
+                Text(text = goal.icon, style = ZeltaTypography.headlineSmall)
                 Text(
                     text  = "${"%.0f".format(goal.progressPercent * 100)}%",
                     style = ZeltaTypography.labelLarge,
-                    color = ZeltaIndigoLight
+                    color = ZeltaTeal,
+                    fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text     = goal.name,
                 style    = ZeltaTypography.titleMedium,
@@ -548,20 +562,19 @@ private fun GoalProgressCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(2.dp))
             Text(
-                text  = "$${"%.0f".format(goal.currentAmount)} / ${"%.0f".format(goal.targetAmount)}",
+                text  = "$${"%.0f".format(goal.currentAmount)} of ${"%.0f".format(goal.targetAmount)}",
                 style = ZeltaTypography.bodySmall,
                 color = ZeltaTextDim
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
             LinearProgressIndicator(
                 progress   = { animatedProgress },
                 modifier   = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
+                    .height(5.dp)
                     .clip(RoundedCornerShape(100.dp)),
-                color      = ZeltaIndigo,
+                color      = ZeltaTeal,
                 trackColor = ZeltaBgElevated,
                 strokeCap  = StrokeCap.Round
             )
@@ -569,29 +582,26 @@ private fun GoalProgressCard(
     }
 }
 
-// Expense Item
+// Transaction Item
 @Composable
-private fun ExpenseItem(expense: Expense) {
+private fun TransactionItem(expense: Expense) {
     Row(
-        modifier              = Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(ZeltaBgCard)
-            .padding(14.dp),
+            .padding(12.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier         = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(ZeltaIndigo.copy(alpha = 0.12f)),
+                .size(42.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(ZeltaTeal.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text  = "💸",
-                style = ZeltaTypography.titleLarge
-            )
+            Text(text = "💸", style = ZeltaTypography.titleMedium)
         }
 
         Column(modifier = Modifier.weight(1f)) {
@@ -602,49 +612,56 @@ private fun ExpenseItem(expense: Expense) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text  = expense.date.format(
-                    DateTimeFormatter.ofPattern("MMM d")
-                ),
-                style = ZeltaTypography.bodySmall,
-                color = ZeltaTextDim
-            )
+            Row(
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(ZeltaTeal)
+                )
+                Text(
+                    text  = expense.date.format(DateTimeFormatter.ofPattern("MMM d")),
+                    style = ZeltaTypography.bodySmall,
+                    color = ZeltaTextDim
+                )
+            }
         }
 
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text  = "-$${"%.2f".format(expense.amount)}",
-                style = ZeltaTypography.headlineSmall,
-                color = ZeltaExpense
-            )
-        }
+        Text(
+            text  = "-$${"%.2f".format(expense.amount)}",
+            style = ZeltaTypography.headlineSmall,
+            color = ZeltaExpense
+        )
     }
 }
 
 // Empty State
 @Composable
-private fun EmptyExpensesHint(onAddExpense: () -> Unit) {
+private fun EmptyTransactionsHint(onAdd: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(ZeltaBgCard)
-            .clickable { onAddExpense() }
+            .clickable { onAdd() }
             .padding(28.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(text = "💸", style = ZeltaTypography.displayMedium)
+            Text(text = "💸", style = ZeltaTypography.displaySmall)
             Text(
-                text  = "No expenses yet",
+                text  = "No transactions yet",
                 style = ZeltaTypography.headlineSmall,
                 color = ZeltaTextPrimary
             )
             Text(
-                text  = "Tap anywhere to log your first one",
+                text  = "Tap to log your first expense",
                 style = ZeltaTypography.bodyMedium,
                 color = ZeltaTextDim
             )
@@ -652,33 +669,34 @@ private fun EmptyExpensesHint(onAddExpense: () -> Unit) {
     }
 }
 
-//Score Tip
+// Insight Tip
 @Composable
-private fun ScoreTipCard(tip: String) {
+private fun InsightTipCard(tip: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        ZeltaIndigo.copy(alpha = 0.15f),
-                        ZeltaMint.copy(alpha = 0.05f)
+                        ZeltaTeal.copy(alpha = 0.08f),
+                        ZeltaCoral.copy(alpha = 0.04f)
                     )
                 )
             )
-            .padding(18.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment     = Alignment.Top
     ) {
-        Text(text = "💡", style = ZeltaTypography.headlineMedium)
+        Text(text = "💡", style = ZeltaTypography.titleLarge)
         Column {
             Text(
                 text  = "Zelta Insight",
                 style = ZeltaTypography.titleMedium,
-                color = ZeltaIndigoLight
+                color = ZeltaTealLight,
+                fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(3.dp))
             Text(
                 text  = tip,
                 style = ZeltaTypography.bodyMedium,

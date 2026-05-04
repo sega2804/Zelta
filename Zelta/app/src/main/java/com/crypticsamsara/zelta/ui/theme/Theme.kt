@@ -21,75 +21,81 @@ object ZeltaThemeState {
 
 //Dark Color Scheme (Primary)
 private val ZeltaDarkColorScheme = darkColorScheme(
-    primary            = ZeltaIndigo,
-    onPrimary          = ZeltaTextPrimary,
-    primaryContainer   = ZeltaIndigoDark,
-    onPrimaryContainer = ZeltaIndigoLight,
+    primary              = ZeltaTeal,
+    onPrimary            = ZeltaBgBase,
+    primaryContainer     = ZeltaTealContainer,
+    onPrimaryContainer   = ZeltaTealLight,
 
-    secondary          = ZeltaMint,
-    onSecondary        = ZeltaBgBase,
-    secondaryContainer = Color(0xFF003D2E),
-    onSecondaryContainer = ZeltaMintLight,
+    secondary            = ZeltaCoral,
+    onSecondary          = ZeltaBgBase,
+    secondaryContainer   = ZeltaCoralContainer,
+    onSecondaryContainer = ZeltaCoralLight,
 
-    background         = ZeltaBgBase,
-    onBackground       = ZeltaTextPrimary,
+    tertiary             = ZeltaAmber,
+    onTertiary           = ZeltaBgBase,
 
-    surface            = ZeltaBgCard,
-    onSurface          = ZeltaTextPrimary,
-    surfaceVariant     = ZeltaBgElevated,
-    onSurfaceVariant   = ZeltaTextSecondary,
+    background           = ZeltaBgBase,
+    onBackground         = ZeltaTextPrimary,
 
-    outline            = ZeltaBorder,
-    outlineVariant     = ZeltaBorderFocus,
+    surface              = ZeltaBgCard,
+    onSurface            = ZeltaTextPrimary,
+    surfaceVariant       = ZeltaBgElevated,
+    onSurfaceVariant     = ZeltaTextSecondary,
 
-    error              = ZeltaDanger,
-    onError            = ZeltaTextPrimary,
+    outline              = ZeltaBorder,
+    outlineVariant       = ZeltaBorderStrong,
+
+    error                = ZeltaDanger,
+    onError              = ZeltaTextPrimary,
 )
 
-//Light Color Scheme (Optional)
+// Light Scheme
 private val ZeltaLightColorScheme = lightColorScheme(
-    primary            = ZeltaIndigoDark,
-    onPrimary          = Color(0xFFFFFFFF),
-    primaryContainer   = Color(0xFFEAE8FF),
-    onPrimaryContainer = ZeltaIndigoDark,
+    primary              = ZeltaTealDark,
+    onPrimary            = Color.White,
+    primaryContainer     = Color(0xFFD0F5EE),
+    onPrimaryContainer   = ZeltaTealDark,
 
-    secondary          = Color(0xFF006B52),
-    onSecondary        = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFD0FFE8),
-    onSecondaryContainer = Color(0xFF004D3A),
+    secondary            = ZeltaCoralDark,
+    onSecondary          = Color.White,
+    secondaryContainer   = Color(0xFFFFE4DC),
+    onSecondaryContainer = ZeltaCoralDark,
 
-    background         = Color(0xFFF6F6FF),
-    onBackground       = Color(0xFF0A0A1A),
+    tertiary             = Color(0xFFB07800),
+    onTertiary           = Color.White,
 
-    surface            = Color(0xFFFFFFFF),
-    onSurface          = Color(0xFF0A0A1A),
-    surfaceVariant     = Color(0xFFEEEEFF),
-    onSurfaceVariant   = Color(0xFF44445A),
+    background           = ZeltaLightBg,
+    onBackground         = ZeltaLightText,
 
-    outline            = Color(0xFFCCCCDD),
-    outlineVariant     = ZeltaIndigo,
+    surface              = ZeltaLightCard,
+    onSurface            = ZeltaLightText,
+    surfaceVariant       = ZeltaLightElevated,
+    onSurfaceVariant     = Color(0xFF606080),
 
-    error              = Color(0xFFCC3333),
-    onError            = Color(0xFFFFFFFF),
+    outline              = ZeltaLightBorder,
+    outlineVariant       = Color(0xFFCCCCE0),
+
+    error                = Color(0xFFCC3333),
+    onError              = Color.White,
 )
 
-// Zelta Theme
+// Theme entry point
 @Composable
 fun ZeltaTheme(
     darkTheme: Boolean = ZeltaThemeState.isDarkMode,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) ZeltaDarkColorScheme else ZeltaLightColorScheme
+    val colorScheme = if (darkTheme) ZeltaDarkColorScheme
+    else ZeltaLightColorScheme
 
-    // Make status bar and nav bar match our background
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
+            window.statusBarColor     = colorScheme.background.toArgb()
             window.navigationBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightStatusBars     = !darkTheme
                 isAppearanceLightNavigationBars = !darkTheme
             }
         }
@@ -97,7 +103,7 @@ fun ZeltaTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = ZeltaTypography,
-        content = content
+        typography  = ZeltaTypography,
+        content     = content
     )
 }

@@ -1,5 +1,6 @@
 package com.crypticsamsara.zelta.ui.track
 
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -42,29 +42,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.crypticsamsara.zelta.domain.model.Category
 import com.crypticsamsara.zelta.domain.model.Expense
-import com.crypticsamsara.zelta.ui.component.ZeltaCard
 import com.crypticsamsara.zelta.ui.component.ZeltaChip
-import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaDanger
 import com.crypticsamsara.zelta.ui.theme.ZeltaExpense
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
-import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTypography
 import java.time.format.DateTimeFormatter
-import kotlin.collections.find
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +69,6 @@ fun TrackScreen(
     val uiState       by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarState  = remember { SnackbarHostState() }
 
-    // Show error in snackbar
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
             snackbarState.showSnackbar(it)
@@ -87,29 +81,42 @@ fun TrackScreen(
             .fillMaxSize()
             .background(ZeltaBgBase)
     ) {
-        // Top glow
-        Box(
-            modifier = Modifier
-                .size(250.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(ZeltaIndigoGlow, Color.Transparent)
-                    ),
-                    CircleShape
-                )
-                .align(Alignment.TopStart)
-        )
-
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Header
-            TrackHeader(totalForPeriod = uiState.totalForPeriod)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
+            ) {
+                Text(
+                    text  = "Expenses",
+                    style = ZeltaTypography.headlineLarge,
+                    color = ZeltaTextPrimary
+                )
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text  = "-$${"%.2f".format(uiState.totalForPeriod)}",
+                        style = ZeltaTypography.displaySmall,
+                        color = ZeltaExpense
+                    )
+                    Text(
+                        text     = "this period",
+                        style    = ZeltaTypography.bodyMedium,
+                        color    = ZeltaTextDim,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+            }
 
-            // Filter Chips
+            // Period chips
             LazyRow(
                 contentPadding        = PaddingValues(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier              = Modifier.padding(bottom = 10.dp)
+                modifier              = Modifier.padding(bottom = 8.dp)
             ) {
                 items(ExpenseFilter.entries.toTypedArray()) { filter ->
                     ZeltaChip(
@@ -120,12 +127,12 @@ fun TrackScreen(
                 }
             }
 
-            // Category Filters
+            // Category chips
             if (uiState.categories.isNotEmpty()) {
                 LazyRow(
                     contentPadding        = PaddingValues(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier              = Modifier.padding(bottom = 16.dp)
+                    modifier              = Modifier.padding(bottom = 14.dp)
                 ) {
                     item {
                         ZeltaChip(
@@ -138,36 +145,58 @@ fun TrackScreen(
                         ZeltaChip(
                             label    = "${category.icon} ${category.name}",
                             selected = uiState.selectedCategoryId == category.id,
-                            onClick  = {
-                                viewModel.onCategoryFilterSelected(category.id)
-                            }
+                            onClick  = { viewModel.onCategoryFilterSelected(category.id) }
                         )
                     }
                 }
             }
 
-            // Expense List
-            val filteredExpenses = uiState.expenses.filter { expense ->
+            // List
+            val filtered = uiState.expenses.filter { expense ->
                 uiState.selectedCategoryId == null ||
                         expense.categoryId == uiState.selectedCategoryId
             }
+            val grouped = viewModel.groupExpensesByDate(filtered)
 
-            val groupedExpenses = viewModel.groupExpensesByDate(filteredExpenses)
-
-            if (filteredExpenses.isEmpty()) {
-                EmptyTrackState()
+            if (filtered.isEmpty()) {
+                Box(
+                    modifier         = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(40.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(ZeltaBgCard)
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(text = "🧾", style = ZeltaTypography.displaySmall)
+                        Text(
+                            text  = "No expenses found",
+                            style = ZeltaTypography.headlineSmall,
+                            color = ZeltaTextPrimary
+                        )
+                        Text(
+                            text  = "Tap + to log your first one",
+                            style = ZeltaTypography.bodyMedium,
+                            color = ZeltaTextDim
+                        )
+                    }
+                }
             } else {
                 LazyColumn(
-                    contentPadding        = PaddingValues(
+                    contentPadding      = PaddingValues(
                         start  = 20.dp,
                         end    = 20.dp,
                         bottom = 110.dp
                     ),
-                    verticalArrangement   = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    groupedExpenses.forEach { group ->
-                        // Date header
+                    grouped.forEach { group ->
                         item {
+                            Spacer(Modifier.height(6.dp))
                             Row(
                                 modifier              = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -181,13 +210,13 @@ fun TrackScreen(
                                 Text(
                                     text  = "-$${"%.2f".format(group.total)}",
                                     style = ZeltaTypography.labelLarge,
-                                    color = ZeltaExpense
+                                    color = ZeltaExpense,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(6.dp))
                         }
 
-                        // Expense items
                         items(
                             items = group.expenses,
                             key   = { it.id }
@@ -203,38 +232,33 @@ fun TrackScreen(
             }
         }
 
-        // FAB
         FloatingActionButton(
             onClick        = { viewModel.showAddSheet() },
             modifier       = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
-            shape          = RoundedCornerShape(20.dp),
-            containerColor = ZeltaIndigo,
-            contentColor   = ZeltaTextPrimary
+            shape          = RoundedCornerShape(100.dp),
+            containerColor = ZeltaTeal,
+            contentColor   = Color(0xFF07080F)
         ) {
-            Icon(Icons.Rounded.Add,
-                contentDescription = "Add Expense",
-                modifier = Modifier.size(26.dp))
+            Icon(Icons.Rounded.Add, contentDescription = "Add", modifier = Modifier.size(24.dp))
         }
 
-        // Snackbar
         SnackbarHost(
             hostState = snackbarState,
             modifier  = Modifier.align(Alignment.BottomCenter)
         )
 
-        // Add Expense Sheet
         AnimatedVisibility(
             visible = uiState.isAddSheetVisible,
             enter   = fadeIn() + slideInVertically { it },
             exit    = fadeOut()
         ) {
             AddExpenseSheet(
-                categories  = uiState.categories,
-                isLoading   = uiState.isAddingExpense,
-                onDismiss   = { viewModel.hideAddSheet() },
-                onConfirm   = { amount, categoryId, note, date ->
+                categories = uiState.categories,
+                isLoading  = uiState.isAddingExpense,
+                onDismiss  = { viewModel.hideAddSheet() },
+                onConfirm  = { amount, categoryId, note, date ->
                     viewModel.onAddExpense(amount, categoryId, note, date)
                 }
             )
@@ -242,38 +266,6 @@ fun TrackScreen(
     }
 }
 
-// Track Header
-@Composable
-private fun TrackHeader(totalForPeriod: Double) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Text(
-            text = "Expenses",
-            style = ZeltaTypography.headlineLarge,
-            color = ZeltaTextPrimary
-        )
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text  = "-$${"%.2f".format(totalForPeriod)}",
-                style = ZeltaTypography.displaySmall,
-                color = ZeltaExpense
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text     = "total",
-                style    = ZeltaTypography.bodyMedium,
-                color    = ZeltaTextDim,
-                modifier = Modifier.padding(bottom = 3.dp)
-            )
-        }
-    }
-}
-
-// Swipeable Expense Item
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SwipeableExpenseItem(
@@ -283,39 +275,39 @@ private fun SwipeableExpenseItem(
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         initialValue       = SwipeToDismissBoxValue.Settled,
-        confirmValueChange = { dismissValue: SwipeToDismissBoxValue ->
-            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
+        confirmValueChange = { value: SwipeToDismissBoxValue ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete(); true
             } else false
         },
         positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     )
+
     SwipeToDismissBox(
         state                       = dismissState,
         enableDismissFromStartToEnd = false,
         enableDismissFromEndToStart = true,
         backgroundContent           = {
             Box(
-                modifier = Modifier
+                modifier         = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(ZeltaDanger.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Row(
-                    modifier = Modifier.padding(end = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier              = Modifier.padding(end = 20.dp),
+                    verticalAlignment     = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Delete,
+                        Icons.Rounded.Delete,
                         contentDescription = "Delete",
-                        tint = ZeltaDanger,
-                        modifier = Modifier.padding(end = 20.dp)
+                        tint               = ZeltaDanger,
+                        modifier           = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Delete",
+                        text  = "Delete",
                         style = ZeltaTypography.labelLarge,
                         color = ZeltaDanger
                     )
@@ -324,32 +316,20 @@ private fun SwipeableExpenseItem(
         }
     ) {
         val category = categories.find { it.id == expense.categoryId }
-        ExpenseRow(expense = expense, category = category)
-    }
-}
-
-// Expense Row
-@Composable
-private fun ExpenseRow(
-    expense: Expense,
-    category: Category?
-) {
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
                 .background(ZeltaBgCard)
-                .padding(14.dp),
+                .padding(12.dp),
             verticalAlignment     = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Category icon bubble
             Box(
                 modifier         = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(
-                        (category?.color ?: ZeltaIndigo).copy(alpha = 0.12f)
-                    ),
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background((category?.color ?: ZeltaTeal).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -366,29 +346,20 @@ private fun ExpenseRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.height(2.dp))
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(4.dp)
+                            .size(5.dp)
                             .clip(CircleShape)
-                            .background(category?.color ?: ZeltaIndigo)
+                            .background(category?.color ?: ZeltaTeal)
                     )
                     Text(
-                    text  = category?.name ?: "Uncategorized",
-                    style = ZeltaTypography.bodySmall,
-                    color = ZeltaTextDim
-                    )
-                    Text(
-                        text  = "·",
-                        style = ZeltaTypography.bodySmall,
-                        color = ZeltaTextDim
-                    )
-                    Text(
-                        text  = expense.date.format(DateTimeFormatter.ofPattern("MMM d")),
+                        text  = "${category?.name ?: "Other"} · ${
+                            expense.date.format(DateTimeFormatter.ofPattern("MMM d"))
+                        }",
                         style = ZeltaTypography.bodySmall,
                         color = ZeltaTextDim
                     )
@@ -399,36 +370,6 @@ private fun ExpenseRow(
                 text  = "-$${"%.2f".format(expense.amount)}",
                 style = ZeltaTypography.headlineSmall,
                 color = ZeltaExpense
-            )
-        }
-    }
-
-// Empty State
-@Composable
-private fun EmptyTrackState() {
-    Box(
-        modifier         = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier            = Modifier
-                .padding(40.dp)
-                .clip(RoundedCornerShape(28.dp))
-                .background(ZeltaBgCard)
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = "🧾", style = ZeltaTypography.displayMedium)
-            Text(
-                text  = "No expenses found",
-                style = ZeltaTypography.headlineSmall,
-                color = ZeltaTextPrimary
-            )
-            Text(
-                text  = "Tap + to log your first one",
-                style = ZeltaTypography.bodyMedium,
-                color = ZeltaTextDim
             )
         }
     }

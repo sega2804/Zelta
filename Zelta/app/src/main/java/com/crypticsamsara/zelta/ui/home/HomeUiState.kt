@@ -15,7 +15,7 @@ data class HomeUiState(
     val currentMonth: YearMonth = YearMonth.now(),
 
     // Spending
-    val totalSpentThisMonth: Double? = 0.0,
+    val totalSpentThisMonth: Double = 0.0,
     val recentExpenses: List<Expense> = emptyList(),
     val categoryTotals: List<CategoryTotal> = emptyList(),
 
@@ -41,9 +41,9 @@ data class HomeUiState(
     // derived - overall budget usage percent
     val overallBudgetUsage: Float
         get() = if (totalBudgetLimit == 0.0) 0f
-        else (totalSpentThisMonth?.div(totalBudgetLimit))
-            ?.toFloat()
-            ?.coerceIn(0f, 1f) ?: 0f
+        else (totalSpentThisMonth / totalBudgetLimit)
+            .toFloat()
+            .coerceIn(0f, 1f)
 
     // Derived - greeting based on time of the day
     val greeting: String

@@ -1,5 +1,6 @@
 package com.crypticsamsara.zelta.ui.goals
 
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -51,21 +51,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.crypticsamsara.zelta.domain.model.Goal
-import com.crypticsamsara.zelta.ui.component.ZeltaCard
-import com.crypticsamsara.zelta.ui.component.ZeltaElevatedCard
+import com.crypticsamsara.zelta.ui.component.ZeltaHeroCard
 import com.crypticsamsara.zelta.ui.component.ZeltaPrimaryButton
+import com.crypticsamsara.zelta.ui.component.ZeltaSmallButton
+import com.crypticsamsara.zelta.ui.theme.ZeltaAmber
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgBase
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgCard
 import com.crypticsamsara.zelta.ui.theme.ZeltaBgElevated
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigo
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoGlow
-import com.crypticsamsara.zelta.ui.theme.ZeltaIndigoLight
-import com.crypticsamsara.zelta.ui.theme.ZeltaMint
+import com.crypticsamsara.zelta.ui.theme.ZeltaCoral
+import com.crypticsamsara.zelta.ui.theme.ZeltaCoralDark
+import com.crypticsamsara.zelta.ui.theme.ZeltaTeal
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealDark
+import com.crypticsamsara.zelta.ui.theme.ZeltaTealLight
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextDim
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextPrimary
 import com.crypticsamsara.zelta.ui.theme.ZeltaTextSecondary
@@ -91,101 +94,261 @@ fun GoalsScreen(
             .fillMaxSize()
             .background(ZeltaBgBase)
     ) {
-        // Glow
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(ZeltaIndigoGlow, Color.Transparent)
-                    ),
-                    CircleShape
-                )
-                .align(Alignment.TopEnd)
-        )
-
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Header
-            GoalsHeader(
-                totalSaved  = uiState.totalSaved,
-                totalTarget = uiState.totalTarget
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
+            ) {
+                Text(
+                    text  = "My Goals",
+                    style = ZeltaTypography.headlineLarge,
+                    color = ZeltaTextPrimary
+                )
+                Row(
+                    verticalAlignment     = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text  = "$${"%.2f".format(uiState.totalSaved)}",
+                        style = ZeltaTypography.displaySmall,
+                        color = ZeltaTeal
+                    )
+                    Text(
+                        text     = "saved of $${"%.2f".format(uiState.totalTarget)}",
+                        style    = ZeltaTypography.bodyMedium,
+                        color    = ZeltaTextDim,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+            }
 
-            //Tabs
-            GoalsTabs(
-                selectedTab = uiState.selectedTab,
-                onTabSelected = { viewModel.onTabSelected(it) }
-            )
+            // Summary hero
+            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                ZeltaHeroCard {
+                    Row(
+                        modifier              = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text  = "ACTIVE",
+                                style = ZeltaTypography.labelSmall,
+                                color = Color.White.copy(alpha = 0.45f)
+                            )
+                            Text(
+                                text  = "${uiState.activeGoals.size}",
+                                style = ZeltaTypography.displaySmall,
+                                color = Color.White
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(1.dp, 40.dp)
+                                .background(Color.White.copy(alpha = 0.1f))
+                                .align(Alignment.CenterVertically)
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text  = "TOTAL SAVED",
+                                style = ZeltaTypography.labelSmall,
+                                color = Color.White.copy(alpha = 0.45f)
+                            )
+                            Text(
+                                text  = "$${"%.0f".format(uiState.totalSaved)}",
+                                style = ZeltaTypography.displaySmall,
+                                color = ZeltaTealLight
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(1.dp, 40.dp)
+                                .background(Color.White.copy(alpha = 0.1f))
+                                .align(Alignment.CenterVertically)
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text  = "COMPLETED",
+                                style = ZeltaTypography.labelSmall,
+                                color = Color.White.copy(alpha = 0.45f)
+                            )
+                            Text(
+                                text  = "${uiState.completedGoals.size}",
+                                style = ZeltaTypography.displaySmall,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Content
+            // Tabs
+            TabRow(
+                selectedTabIndex = GoalTab.entries.indexOf(uiState.selectedTab),
+                containerColor   = ZeltaBgBase,
+                contentColor     = ZeltaTeal,
+                indicator        = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        modifier = Modifier.tabIndicatorOffset(
+                            tabPositions[GoalTab.entries.indexOf(uiState.selectedTab)]
+                        ),
+                        color    = ZeltaTeal,
+                        height   = 2.dp
+                    )
+                }
+            ) {
+                GoalTab.entries.forEach { tab ->
+                    Tab(
+                        selected = uiState.selectedTab == tab,
+                        onClick  = { viewModel.onTabSelected(tab) },
+                        text     = {
+                            Text(
+                                text  = tab.label,
+                                style = ZeltaTypography.titleMedium,
+                                color = if (uiState.selectedTab == tab)
+                                    ZeltaTeal else ZeltaTextDim
+                            )
+                        }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
             val goalsToShow = when (uiState.selectedTab) {
                 GoalTab.ACTIVE    -> uiState.activeGoals
                 GoalTab.COMPLETED -> uiState.completedGoals
             }
 
             if (goalsToShow.isEmpty()) {
-                EmptyGoalsState(
-                    tab       = uiState.selectedTab,
-                    onAddGoal = { viewModel.showAddGoalSheet() }
-                )
+                Box(
+                    modifier         = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(40.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(ZeltaBgCard)
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text  = if (uiState.selectedTab == GoalTab.ACTIVE) "🎯" else "🏆",
+                            style = ZeltaTypography.displaySmall
+                        )
+                        Text(
+                            text  = if (uiState.selectedTab == GoalTab.ACTIVE)
+                                "No active goals" else "No completed goals yet",
+                            style = ZeltaTypography.headlineSmall,
+                            color = ZeltaTextPrimary
+                        )
+                        Text(
+                            text  = if (uiState.selectedTab == GoalTab.ACTIVE)
+                                "Tap + to create your first goal"
+                            else "Complete a goal to see it here",
+                            style = ZeltaTypography.bodyMedium,
+                            color = ZeltaTextDim
+                        )
+                        if (uiState.selectedTab == GoalTab.ACTIVE) {
+                            Spacer(Modifier.height(8.dp))
+                            ZeltaPrimaryButton(
+                                text    = "Create Goal",
+                                onClick = { viewModel.showAddGoalSheet() }
+                            )
+                        }
+                    }
+                }
             } else {
                 LazyColumn(
-                    contentPadding        = PaddingValues(
+                    contentPadding      = PaddingValues(
                         start  = 20.dp,
                         end    = 20.dp,
                         bottom = 110.dp
                     ),
-                    verticalArrangement   = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(
-                        items = goalsToShow,
-                        key   = { it.id }
-                    ) { goal ->
+                    items(goalsToShow, key = { it.id }) { goal ->
                         GoalCard(
-                            goal        = goal,
-                            onContribute = {
-                                viewModel.showContributeSheet(goal.id)
-                            },
-                            onDelete    = { viewModel.onDeleteGoal(goal.id) }
+                            goal         = goal,
+                            index        = goalsToShow.indexOf(goal),
+                            onContribute = { viewModel.showContributeSheet(goal.id) },
+                            onDelete     = { viewModel.onDeleteGoal(goal.id) }
                         )
                     }
                 }
             }
         }
 
-        // FAB
         FloatingActionButton(
             onClick        = { viewModel.showAddGoalSheet() },
             modifier       = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp),
-            shape          = RoundedCornerShape(20.dp),
-            containerColor = ZeltaIndigo,
-            contentColor   = ZeltaTextPrimary
+            shape          = RoundedCornerShape(100.dp),
+            containerColor = ZeltaTeal,
+            contentColor   = Color(0xFF07080F)
         ) {
-            Icon(Icons.Rounded.Add,
-                contentDescription = "Add Goal",
-                modifier = Modifier.size(26.dp))
+            Icon(Icons.Rounded.Add, null, modifier = Modifier.size(24.dp))
         }
 
-        // Celebration overlay
         AnimatedVisibility(
             visible = uiState.justCompletedGoal != null,
-            enter   = fadeIn(),
-            exit    = fadeOut()
+            enter   = fadeIn(), exit = fadeOut()
         ) {
             uiState.justCompletedGoal?.let { goal ->
-                GoalCelebrationOverlay(
-                    goal      = goal,
-                    onDismiss = { viewModel.dismissCelebration() }
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(ZeltaBgBase.copy(alpha = 0.95f))
+                        .clickable { viewModel.dismissCelebration() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(32.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(ZeltaTeal.copy(alpha = 0.2f), ZeltaBgCard)
+                                )
+                            )
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(text = "🎉", style = ZeltaTypography.displayLarge)
+                        Icon(
+                            Icons.Rounded.EmojiEvents,
+                            contentDescription = null,
+                            tint               = ZeltaAmber,
+                            modifier           = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text  = "Goal Complete!",
+                            style = ZeltaTypography.headlineLarge,
+                            color = ZeltaTextPrimary
+                        )
+                        Text(
+                            text  = "\"${goal.name}\" — you did it!",
+                            style = ZeltaTypography.bodyLarge,
+                            color = ZeltaTextSecondary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        ZeltaPrimaryButton(
+                            text    = "Celebrate! 🥳",
+                            onClick = { viewModel.dismissCelebration() }
+                        )
+                    }
+                }
             }
         }
 
-        // Sheets
         AnimatedVisibility(
             visible = uiState.isAddGoalSheetVisible,
             enter   = fadeIn() + slideInVertically { it },
@@ -210,9 +373,7 @@ fun GoalsScreen(
                     goal      = goal,
                     isLoading = uiState.isSubmitting,
                     onDismiss = { viewModel.hideContributeSheet() },
-                    onConfirm = { amount ->
-                        viewModel.onContribute(goal.id, amount)
-                    }
+                    onConfirm = { amount -> viewModel.onContribute(goal.id, amount) }
                 )
             }
         }
@@ -224,82 +385,10 @@ fun GoalsScreen(
     }
 }
 
-// Header
-@Composable
-private fun GoalsHeader(
-    totalSaved: Double,
-    totalTarget: Double
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Text(
-            text  = "My Goals",
-            style = ZeltaTypography.headlineLarge,
-            color = ZeltaTextPrimary
-        )
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-        Text(
-            text  = "$${"%.2f".format(totalSaved)} saved of $${"%.2f".format(totalTarget)}",
-            style = ZeltaTypography.displaySmall,
-            color = ZeltaTextSecondary
-        )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text     = "saved of $${"%.2f".format(totalTarget)}",
-                style    = ZeltaTypography.bodyMedium,
-                color    = ZeltaTextDim,
-                modifier = Modifier.padding(bottom = 3.dp)
-            )
-        }
-    }
-}
-
-// Tabs
-@Composable
-private fun GoalsTabs(
-    selectedTab: GoalTab,
-    onTabSelected: (GoalTab) -> Unit
-) {
-    val tabs = GoalTab.entries.toTypedArray()
-    TabRow(
-        selectedTabIndex = tabs.indexOf(selectedTab),
-        containerColor   = ZeltaBgBase,
-        contentColor     = ZeltaIndigoLight,
-        indicator        = { tabPositions ->
-            TabRowDefaults.SecondaryIndicator(
-                modifier = Modifier.tabIndicatorOffset(
-                    tabPositions[tabs.indexOf(selectedTab)]
-                ),
-                height = 2.dp,
-                color = ZeltaIndigo
-            )
-        }
-    ) {
-        tabs.forEach { tab ->
-            Tab(
-                selected         = selectedTab == tab,
-                onClick          = { onTabSelected(tab) },
-                text             = {
-                    Text(
-                        text  = tab.label,
-                        style = ZeltaTypography.titleMedium,
-                        color = if (selectedTab == tab)
-                            ZeltaIndigoLight else ZeltaTextDim
-                    )
-                }
-            )
-        }
-    }
-}
-
-// Goal Card
 @Composable
 private fun GoalCard(
     goal: Goal,
+    index: Int,
     onContribute: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -311,16 +400,18 @@ private fun GoalCard(
     )
     LaunchedEffect(Unit) { animationPlayed = true }
 
+    // Alternate teal and coral for goal progress bars
+    val accentColor = if (index % 2 == 0) ZeltaTeal else ZeltaCoral
+    val accentDark  = if (index % 2 == 0) ZeltaTealDark else ZeltaCoralDark
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(ZeltaBgCard)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Column {
-
-            //Top Row
             Row(
                 modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -328,28 +419,17 @@ private fun GoalCard(
             ) {
                 Row(
                     verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Icon bubble
                     Box(
-                        modifier         = Modifier
-                            .size(52.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Brush.linearGradient(
-                                colors = listOf(
-                                    ZeltaIndigo.copy(alpha = 0.3f),
-                                    ZeltaIndigo.copy(alpha = 0.1f)
-                                    )
-                                )
-                            ),
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(accentColor.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text  = goal.icon,
-                            style = ZeltaTypography.headlineMedium
-                        )
+                        Text(text = goal.icon, style = ZeltaTypography.headlineSmall)
                     }
-
                     Column {
                         Text(
                             text     = goal.name,
@@ -362,43 +442,40 @@ private fun GoalCard(
                             Text(
                                 text  = "By ${goal.deadline}",
                                 style = ZeltaTypography.bodySmall,
-                                color = if (goal.isOverdue)
-                                    ZeltaWarning else ZeltaTextSecondary
+                                color = if (goal.isOverdue) ZeltaWarning else ZeltaTextDim
                             )
                         }
                     }
                 }
-
                 IconButton(onClick = onDelete) {
                     Icon(
-                        imageVector        = Icons.Rounded.Delete,
-                        contentDescription = "Delete goal",
-                        tint               = ZeltaTextDim,
-                        modifier           = Modifier.size(18.dp)
+                        Icons.Rounded.Delete,
+                        contentDescription = "Delete",
+                        tint     = ZeltaTextDim,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(14.dp))
 
-            // Progress bar
             LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
+                progress   = { animatedProgress },
+                modifier   = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
+                    .height(7.dp)
                     .clip(RoundedCornerShape(100.dp)),
-                color = ZeltaIndigo,
+                color      = accentColor,
                 trackColor = ZeltaBgElevated,
-                strokeCap = StrokeCap.Round
+                strokeCap  = StrokeCap.Round
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
-            // Amounts
             Row(
                 modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment     = Alignment.CenterVertically
             ) {
                 Column {
                     Text(
@@ -409,7 +486,7 @@ private fun GoalCard(
                     Text(
                         text  = "$${"%.2f".format(goal.currentAmount)}",
                         style = ZeltaTypography.headlineSmall,
-                        color = ZeltaMint
+                        color = accentColor
                     )
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -419,9 +496,10 @@ private fun GoalCard(
                         color = ZeltaTextDim
                     )
                     Text(
-                        text  = "$${"%.2f".format(goal.remainingAmount)}",
+                        text  = "${"%.0f".format(goal.progressPercent * 100)}%",
                         style = ZeltaTypography.headlineSmall,
-                        color = ZeltaIndigoLight
+                        color = accentColor,
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
@@ -439,114 +517,13 @@ private fun GoalCard(
             }
 
             if (!goal.isCompleted) {
-                Spacer(Modifier.height(16.dp))
-                ZeltaPrimaryButton(
-                    text    = "Add Funds",
-                    onClick = onContribute
+                Spacer(Modifier.height(14.dp))
+                ZeltaSmallButton(
+                    text    = "+ Add Funds",
+                    onClick = onContribute,
+                    isCoral = index % 2 != 0
                 )
             }
-        }
-    }
-}
-
-// Empty State
-@Composable
-private fun EmptyGoalsState(
-    tab: GoalTab,
-    onAddGoal: () -> Unit
-) {
-    Box(
-        modifier         = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(40.dp)
-                .clip(RoundedCornerShape(28.dp))
-                .background(ZeltaBgCard)
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text  = if (tab == GoalTab.ACTIVE) "🎯" else "🏆",
-                style = ZeltaTypography.displayMedium
-            )
-            Text(
-                text  = if (tab == GoalTab.ACTIVE) "No active goals"
-                else "No completed goals yet",
-                style = ZeltaTypography.headlineSmall,
-                color = ZeltaTextPrimary
-            )
-            Text(
-                text  = if (tab == GoalTab.ACTIVE)
-                    "Set a goal and start saving" else "Complete a goal to see it here",
-                style = ZeltaTypography.bodyMedium,
-                color = ZeltaTextDim
-            )
-            if (tab == GoalTab.ACTIVE) {
-                Spacer(Modifier.height(8.dp))
-                ZeltaPrimaryButton(
-                    text    = "Create Goal",
-                    onClick = onAddGoal
-                )
-            }
-        }
-    }
-}
-
-
-// Celebration Overlay
-@Composable
-private fun GoalCelebrationOverlay(
-    goal: Goal,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(ZeltaBgBase.copy(alpha = 0.95f))
-            .clickable{ onDismiss() },
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(32.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            ZeltaIndigo.copy(alpha = 0.3f),
-                            ZeltaBgCard
-                        )
-                    )
-                )
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(text = "🎉", style = ZeltaTypography.displayLarge)
-            Icon(
-                imageVector        = Icons.Rounded.EmojiEvents,
-                contentDescription = null,
-                tint               = ZeltaWarning,
-                modifier           = Modifier.size(48.dp)
-            )
-            Text(
-                text  = "Goal Complete!",
-                style = ZeltaTypography.headlineLarge,
-                color = ZeltaTextPrimary
-            )
-            Text(
-                text  = "You hit your target for\n\"${goal.name}\"",
-                style = ZeltaTypography.bodyLarge,
-                color = ZeltaTextSecondary
-            )
-            Spacer(Modifier.height(8.dp))
-            ZeltaPrimaryButton(
-                text    = "Celebrate! 🥳",
-                onClick = onDismiss
-            )
         }
     }
 }
